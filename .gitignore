@@ -52,3 +52,9 @@ next-env.d.ts
 
 # Documentation (internal notes)
 /docs/
+
+# Cleanup scripts (internal tooling)
+/__CLEANUP__/
+
+# Editor config
+.vscode/
