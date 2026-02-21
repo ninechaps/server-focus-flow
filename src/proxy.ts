@@ -1,34 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const hasClerkKeys = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+export function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-export default async function middleware(req: NextRequest) {
-  // API routes bypass Clerk entirely — protected by custom JWT middleware
-  if (req.nextUrl.pathname.startsWith('/api/')) {
-    return NextResponse.next()
+  // API routes: pass through
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
   }
 
-  // If Clerk is not configured, skip Clerk middleware
-  if (!hasClerkKeys) {
-    return NextResponse.next()
+  // Auth pages: pass through, but redirect logged-in users to dashboard
+  if (pathname.startsWith('/auth/')) {
+    const token = req.cookies.get('access_token')?.value;
+    if (token) {
+      return NextResponse.redirect(new URL('/dashboard/overview', req.url));
+    }
+    return NextResponse.next();
   }
 
-  // Dynamically import Clerk to avoid module-level publishableKey check
-  const { clerkMiddleware, createRouteMatcher } = await import(
-    '@clerk/nextjs/server'
-  )
-  const isProtectedRoute = createRouteMatcher(['/dashboard(.*)'])
+  // Dashboard routes: require auth
+  if (pathname.startsWith('/dashboard')) {
+    const token = req.cookies.get('access_token')?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL('/auth/login', req.url));
+    }
+  }
 
-  return clerkMiddleware(async (auth) => {
-    if (isProtectedRoute(req)) await auth.protect()
-  })(req, {} as any)
+  // Root path: redirect based on auth state
+  if (pathname === '/') {
+    const token = req.cookies.get('access_token')?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL('/auth/login', req.url));
+    }
+    return NextResponse.redirect(new URL('/dashboard/overview', req.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
-  ],
-}
+    '/(api|trpc)(.*)'
+  ]
+};

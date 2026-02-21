@@ -1,89 +1,65 @@
-import { NextRequest } from 'next/server'
-import { registerSchema } from '@/server/auth/validation/schemas'
-import { verifyCode } from '@/server/auth/verification'
-import { hashPassword } from '@/server/auth/password'
-import { createSessionAndTokens, sanitizeUser } from '@/server/auth/session'
-import * as userRepo from '@/server/repositories/user-repository'
-import { successResponse, errorResponse } from '@/server/api-response'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  registerSchema,
+  validatePasswordPolicy
+} from '@/server/auth/validation/schemas';
+import { registerUser, RegisterError } from '@/server/auth/register';
+import { decryptPassword } from '@/server/auth/rsa';
 
+// POST /api/auth/register — Client registration (no cookie/session)
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const parsed = registerSchema.safeParse(body)
+    const body = await req.json();
+    const parsed = registerSchema.safeParse(body);
 
     if (!parsed.success) {
-      return errorResponse(parsed.error.issues[0].message, 400)
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0].message },
+        { status: 400 }
+      );
     }
 
-    const { email, code, password, username, fullName } = parsed.data
-
-    const codeResult = await verifyCode(email, code)
-    if (!codeResult.valid) {
-      return errorResponse(codeResult.error ?? 'Invalid code', 400)
+    let password: string;
+    try {
+      password = decryptPassword(parsed.data.encryptedPassword);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid encrypted password' },
+        { status: 400 }
+      );
     }
 
-    const passwordHash = await hashPassword(password)
-
-    let user = await userRepo.findByEmail(email)
-
-    if (user) {
-      if (user.passwordHash) {
-        return errorResponse('An account with this email already exists', 409)
-      }
-
-      user = await userRepo.linkPassword(user.id, passwordHash)
-      if (username) {
-        user = await userRepo.update(user.id, { username })
-      }
-      if (fullName) {
-        user = await userRepo.update(user.id, { fullName })
-      }
-    } else {
-      const adminEmails = (process.env.ADMIN_EMAILS ?? '')
-        .split(',')
-        .map((e) => e.trim())
-        .filter(Boolean)
-
-      user = await userRepo.create({
-        email,
-        username,
-        fullName,
-        passwordHash,
-        registrationSource: 'jwt',
-        emailVerifiedAt: new Date(),
-      })
-
-      if (adminEmails.includes(email)) {
-        await userRepo.assignRole(user.id, 'admin')
-      }
-      await userRepo.assignRole(user.id, 'user')
+    const policyError = validatePasswordPolicy(password);
+    if (policyError) {
+      return NextResponse.json(
+        { success: false, error: policyError },
+        { status: 400 }
+      );
     }
 
-    await userRepo.updateLastLogin(user.id)
+    const { user } = await registerUser({
+      email: parsed.data.email,
+      code: parsed.data.code,
+      password,
+      username: parsed.data.username,
+      fullName: parsed.data.fullName
+    });
 
-    const ipAddress =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      req.headers.get('x-real-ip') ??
-      null
-    const userAgent = req.headers.get('user-agent') ?? null
-
-    const tokens = await createSessionAndTokens(user.id, user.email, 'jwt', {
-      ipAddress: ipAddress ?? undefined,
-      userAgent: userAgent ?? undefined,
-    })
-
-    return successResponse(
-      {
-        user: sanitizeUser(user),
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        sessionId: tokens.sessionId,
-      },
-      undefined,
-      201
-    )
+    return NextResponse.json(
+      { success: true, data: { user } },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Register error:', error)
-    return errorResponse('Internal server error', 500)
+    if (error instanceof RegisterError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
+      );
+    }
+    console.error('Client register error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,5 @@
-import { eq, sql } from 'drizzle-orm'
-import { db } from '@/server/db'
+import { eq, sql } from 'drizzle-orm';
+import { db } from '@/server/db';
 import {
   users,
   userRoles,
@@ -7,33 +7,33 @@ import {
   roles,
   permissions,
   type User,
-  type NewUser,
-} from '@/server/db/schema'
+  type NewUser
+} from '@/server/db/schema';
 
 export async function findByEmail(email: string): Promise<User | null> {
   const result = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  })
-  return result ?? null
+    where: eq(users.email, email)
+  });
+  return result ?? null;
 }
 
 export async function findById(id: string): Promise<User | null> {
   const result = await db.query.users.findFirst({
-    where: eq(users.id, id),
-  })
-  return result ?? null
+    where: eq(users.id, id)
+  });
+  return result ?? null;
 }
 
 export async function findByClerkId(clerkId: string): Promise<User | null> {
   const result = await db.query.users.findFirst({
-    where: eq(users.clerkUserId, clerkId),
-  })
-  return result ?? null
+    where: eq(users.clerkUserId, clerkId)
+  });
+  return result ?? null;
 }
 
 export async function create(data: NewUser): Promise<User> {
-  const [user] = await db.insert(users).values(data).returning()
-  return user
+  const [user] = await db.insert(users).values(data).returning();
+  return user;
 }
 
 export async function update(
@@ -44,15 +44,15 @@ export async function update(
     .update(users)
     .set({ ...data, updatedAt: new Date() })
     .where(eq(users.id, id))
-    .returning()
-  return user
+    .returning();
+  return user;
 }
 
 export async function updateLastLogin(id: string): Promise<void> {
   await db
     .update(users)
     .set({ lastLoginAt: new Date(), updatedAt: new Date() })
-    .where(eq(users.id, id))
+    .where(eq(users.id, id));
 }
 
 export async function addOnlineTime(
@@ -63,9 +63,9 @@ export async function addOnlineTime(
     .update(users)
     .set({
       totalOnlineTime: sql`${users.totalOnlineTime} + ${seconds}`,
-      updatedAt: new Date(),
+      updatedAt: new Date()
     })
-    .where(eq(users.id, id))
+    .where(eq(users.id, id));
 }
 
 export async function linkClerkAccount(
@@ -76,8 +76,8 @@ export async function linkClerkAccount(
     .update(users)
     .set({ clerkUserId, updatedAt: new Date() })
     .where(eq(users.id, id))
-    .returning()
-  return user
+    .returning();
+  return user;
 }
 
 export async function linkPassword(
@@ -89,11 +89,11 @@ export async function linkPassword(
     .set({
       passwordHash,
       emailVerifiedAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     })
     .where(eq(users.id, id))
-    .returning()
-  return user
+    .returning();
+  return user;
 }
 
 export async function getUserPermissions(userId: string): Promise<string[]> {
@@ -101,14 +101,11 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     .select({ code: permissions.code })
     .from(userRoles)
     .innerJoin(rolePermissions, eq(userRoles.roleId, rolePermissions.roleId))
-    .innerJoin(
-      permissions,
-      eq(rolePermissions.permissionId, permissions.id)
-    )
-    .where(eq(userRoles.userId, userId))
+    .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    .where(eq(userRoles.userId, userId));
 
-  const codes = rows.map((row) => row.code)
-  return Array.from(new Set(codes))
+  const codes = rows.map((row) => row.code);
+  return Array.from(new Set(codes));
 }
 
 export async function getUserRoleNames(userId: string): Promise<string[]> {
@@ -116,9 +113,9 @@ export async function getUserRoleNames(userId: string): Promise<string[]> {
     .select({ name: roles.name })
     .from(userRoles)
     .innerJoin(roles, eq(userRoles.roleId, roles.id))
-    .where(eq(userRoles.userId, userId))
+    .where(eq(userRoles.userId, userId));
 
-  return rows.map((row) => row.name)
+  return rows.map((row) => row.name);
 }
 
 export async function assignRole(
@@ -126,15 +123,41 @@ export async function assignRole(
   roleName: string
 ): Promise<void> {
   const role = await db.query.roles.findFirst({
-    where: eq(roles.name, roleName),
-  })
+    where: eq(roles.name, roleName)
+  });
 
   if (!role) {
-    throw new Error(`Role "${roleName}" not found`)
+    throw new Error(`Role "${roleName}" not found`);
   }
 
   await db
     .insert(userRoles)
     .values({ userId, roleId: role.id })
-    .onConflictDoNothing()
+    .onConflictDoNothing();
+}
+
+export async function setUserRoles(
+  userId: string,
+  roleIds: string[]
+): Promise<void> {
+  await db.delete(userRoles).where(eq(userRoles.userId, userId));
+
+  if (roleIds.length > 0) {
+    await db
+      .insert(userRoles)
+      .values(roleIds.map((roleId) => ({ userId, roleId })))
+      .onConflictDoNothing();
+  }
+}
+
+export async function getUserRolesWithIds(
+  userId: string
+): Promise<{ id: string; name: string }[]> {
+  const rows = await db
+    .select({ id: roles.id, name: roles.name })
+    .from(userRoles)
+    .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .where(eq(userRoles.userId, userId));
+
+  return rows;
 }

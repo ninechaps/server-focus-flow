@@ -1,6 +1,7 @@
 import KBar from '@/components/kbar';
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+import { HeartbeatProvider } from '@/components/layout/heartbeat-provider';
 import { InfoSidebar } from '@/components/layout/info-sidebar';
 import { InfobarProvider } from '@/components/ui/infobar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -24,20 +25,23 @@ export default async function DashboardLayout({
   // Persisting the sidebar state in the cookie.
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
+  const sessionId = cookieStore.get('session_id')?.value ?? null;
   return (
-    <KBar>
-      <SidebarProvider defaultOpen={defaultOpen}>
-        <InfobarProvider defaultOpen={false}>
-          <AppSidebar />
-          <SidebarInset>
-            <Header />
-            {/* page main content */}
-            {children}
-            {/* page main content ends */}
-          </SidebarInset>
-          <InfoSidebar side='right' />
-        </InfobarProvider>
-      </SidebarProvider>
-    </KBar>
+    <HeartbeatProvider sessionId={sessionId}>
+      <KBar>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <InfobarProvider defaultOpen={false}>
+            <AppSidebar />
+            <SidebarInset>
+              <Header />
+              {/* page main content */}
+              {children}
+              {/* page main content ends */}
+            </SidebarInset>
+            <InfoSidebar side='right' />
+          </InfobarProvider>
+        </SidebarProvider>
+      </KBar>
+    </HeartbeatProvider>
   );
 }
