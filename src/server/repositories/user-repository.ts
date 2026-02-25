@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { count, eq, isNotNull, sql } from 'drizzle-orm';
 import { db } from '@/server/db';
 import {
   users,
@@ -155,6 +155,18 @@ export async function setUserRoles(
       .values(roleIds.map((roleId) => ({ userId, roleId })))
       .onConflictDoNothing();
   }
+}
+
+/**
+ * 统计已完成注册（有密码）的用户数量。
+ * 用于判断当前注册者是否为系统第一个用户。
+ */
+export async function countRegisteredUsers(): Promise<number> {
+  const [result] = await db
+    .select({ value: count() })
+    .from(users)
+    .where(isNotNull(users.passwordHash));
+  return result?.value ?? 0;
 }
 
 export async function getUserRolesWithIds(

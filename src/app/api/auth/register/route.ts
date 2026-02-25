@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
       code: parsed.data.code,
       password,
       username: parsed.data.username,
-      fullName: parsed.data.fullName
+      fullName: parsed.data.fullName,
+      source: 'client'
     });
 
     return NextResponse.json(

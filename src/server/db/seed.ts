@@ -9,7 +9,15 @@ import { roles, permissions, rolePermissions } from './schema';
 const DEPRECATED_ROLES = ['client_user'];
 
 const ROLES = [
-  { name: 'admin', description: 'Administrator with full access' },
+  {
+    name: 'owner',
+    description:
+      'Owner with highest authority — manages roles, permissions and all users'
+  },
+  {
+    name: 'admin',
+    description: 'Administrator — manages users and views data'
+  },
   {
     name: 'user',
     description: 'FocusFlow client user — can sync data and read/write stats'
@@ -17,15 +25,41 @@ const ROLES = [
 ];
 
 const PERMISSIONS = [
+  // 用户管理
   { code: 'admin:users:read', description: 'View all users' },
   { code: 'admin:users:write', description: 'Modify user information' },
+  // 角色管理（仅 owner）
+  { code: 'admin:roles:read', description: 'View all roles' },
+  {
+    code: 'admin:roles:write',
+    description: 'Modify roles and role-permission assignments'
+  },
+  // 权限管理（仅 owner）
+  { code: 'admin:permissions:read', description: 'View all permissions' },
+  { code: 'admin:permissions:write', description: 'Modify permissions' },
+  // 数据同步
   { code: 'sync:upload', description: 'Upload encrypted data' },
   { code: 'sync:download', description: 'Download encrypted data' },
+  // 统计
   { code: 'stats:read', description: 'Read usage statistics' },
   { code: 'stats:write', description: 'Update usage statistics' }
 ];
 
 const ROLE_PERMISSIONS: Record<string, string[]> = {
+  // owner 拥有所有权限
+  owner: [
+    'admin:users:read',
+    'admin:users:write',
+    'admin:roles:read',
+    'admin:roles:write',
+    'admin:permissions:read',
+    'admin:permissions:write',
+    'sync:upload',
+    'sync:download',
+    'stats:read',
+    'stats:write'
+  ],
+  // admin 管理用户 + 数据访问
   admin: [
     'admin:users:read',
     'admin:users:write',
@@ -34,6 +68,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'stats:read',
     'stats:write'
   ],
+  // user 仅客户端数据同步和统计
   user: ['sync:upload', 'sync:download', 'stats:read', 'stats:write']
 };
 
