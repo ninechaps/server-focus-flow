@@ -18,6 +18,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { encryptPassword } from '@/lib/crypto';
 import { apiClient } from '@/lib/api-client';
+import { PasswordInput } from '@/components/forms/password-input';
 
 export function LoginForm() {
   const t = useTranslations('auth.login');
@@ -81,9 +82,8 @@ export function LoginForm() {
             </div>
             <div className='flex flex-col gap-2'>
               <Label htmlFor='password'>{t('passwordLabel')}</Label>
-              <Input
+              <PasswordInput
                 id='password'
-                type='password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

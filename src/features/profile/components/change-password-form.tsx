@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { encryptPassword } from '@/lib/crypto';
 import { apiClient } from '@/lib/api-client';
+import { PasswordInput } from '@/components/forms/password-input';
 
 export function ChangePasswordForm() {
   const t = useTranslations('profile.passwordForm');
@@ -55,9 +55,8 @@ export function ChangePasswordForm() {
     <form onSubmit={handleSubmit} className='space-y-4'>
       <div className='space-y-1.5'>
         <Label htmlFor='current'>{t('currentPassword')}</Label>
-        <Input
+        <PasswordInput
           id='current'
-          type='password'
           value={current}
           onChange={(e) => setCurrent(e.target.value)}
           required
@@ -65,9 +64,8 @@ export function ChangePasswordForm() {
       </div>
       <div className='space-y-1.5'>
         <Label htmlFor='next'>{t('newPassword')}</Label>
-        <Input
+        <PasswordInput
           id='next'
-          type='password'
           value={next}
           onChange={(e) => setNext(e.target.value)}
           required
@@ -76,9 +74,8 @@ export function ChangePasswordForm() {
       </div>
       <div className='space-y-1.5'>
         <Label htmlFor='confirm'>{t('confirmNewPassword')}</Label>
-        <Input
+        <PasswordInput
           id='confirm'
-          type='password'
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required

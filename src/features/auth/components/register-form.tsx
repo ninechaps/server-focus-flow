@@ -22,6 +22,9 @@ import {
 import { useTranslations } from 'next-intl';
 import { encryptPassword } from '@/lib/crypto';
 import { apiClient } from '@/lib/api-client';
+import { PasswordInput } from '@/components/forms/password-input';
+
+const RESEND_COUNTDOWN = 120;
 
 type Step = 'email' | 'code' | 'password' | 'success';
 
@@ -39,32 +42,53 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
 
-  async function handleSendCode(e: React.FormEvent) {
-    e.preventDefault();
+  // 进入验证码步骤时启动倒计时
+  useEffect(() => {
+    if (step !== 'code') return;
+    setResendSeconds(RESEND_COUNTDOWN);
+  }, [step]);
+
+  // 倒计时 tick
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = setTimeout(() => setResendSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendSeconds]);
+
+  async function sendCode(emailAddress: string) {
     setLoading(true);
-
     try {
       const res = await apiClient('/api/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, purpose: 'register' })
+        body: JSON.stringify({ email: emailAddress, purpose: 'register' })
       });
-
       const data = await res.json();
-
       if (!data.success) {
         toast.error(data.error);
-        return;
+        return false;
       }
-
       toast.success(t('codeSentToast'));
-      setStep('code');
+      return true;
     } catch {
       toast.error(tCommon('networkError'));
+      return false;
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSendCode(e: React.FormEvent) {
+    e.preventDefault();
+    const ok = await sendCode(email);
+    if (ok) setStep('code');
+  }
+
+  async function handleResend() {
+    const ok = await sendCode(email);
+    if (ok) setResendSeconds(RESEND_COUNTDOWN);
   }
 
   function handleCodeComplete() {
@@ -147,15 +171,17 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
               <Button type='submit' className='w-full' disabled={loading}>
                 {loading ? t('sending') : t('sendCode')}
               </Button>
-              <p className='text-muted-foreground text-center text-sm'>
-                {t('alreadyHaveAccount')}{' '}
-                <Link
-                  href='/auth/login'
-                  className='text-primary underline-offset-4 hover:underline'
-                >
-                  {t('signIn')}
-                </Link>
-              </p>
+              {source !== 'client' && (
+                <p className='text-muted-foreground text-center text-sm'>
+                  {t('alreadyHaveAccount')}{' '}
+                  <Link
+                    href='/auth/login'
+                    className='text-primary underline-offset-4 hover:underline'
+                  >
+                    {t('signIn')}
+                  </Link>
+                </p>
+              )}
             </div>
           </CardContent>
         </form>
@@ -198,6 +224,18 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
               >
                 {t('verifyCode')}
               </Button>
+              {/* 重新发送按钮 + 倒计时 */}
+              <Button
+                type='button'
+                variant='ghost'
+                className='w-full'
+                disabled={resendSeconds > 0 || loading}
+                onClick={handleResend}
+              >
+                {resendSeconds > 0
+                  ? t('resendIn', { seconds: resendSeconds })
+                  : t('resendCode')}
+              </Button>
               <Button
                 type='button'
                 variant='ghost'
@@ -217,9 +255,8 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-2'>
                 <Label htmlFor='password'>{t('passwordLabel')}</Label>
-                <Input
+                <PasswordInput
                   id='password'
-                  type='password'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -234,9 +271,8 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                 <Label htmlFor='confirm-password'>
                   {t('confirmPasswordLabel')}
                 </Label>
-                <Input
+                <PasswordInput
                   id='confirm-password'
-                  type='password'
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required

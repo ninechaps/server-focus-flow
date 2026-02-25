@@ -92,7 +92,9 @@
       "successMessage": "Your account has been created. You can now log in from the app.",
       "closeCountdown": "This page will close in {countdown} seconds",
       "closeNow": "Close Now",
-      "passwordsDoNotMatch": "Passwords do not match"
+      "passwordsDoNotMatch": "Passwords do not match",
+      "resendCode": "Resend Code",
+      "resendIn": "Resend in {seconds}s"
     }
   },
   "overview": {
