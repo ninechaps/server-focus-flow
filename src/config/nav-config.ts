@@ -19,6 +19,7 @@ export const navItems: NavItem[] = [
     icon: 'product',
     shortcut: ['p', 'p'],
     isActive: false,
+    hidden: true,
     items: []
   },
   {
@@ -27,6 +28,7 @@ export const navItems: NavItem[] = [
     icon: 'kanban',
     shortcut: ['k', 'k'],
     isActive: false,
+    hidden: true,
     items: []
   },
   {
@@ -47,6 +49,12 @@ export const navItems: NavItem[] = [
         shortcut: ['s', 's'],
         url: '/dashboard/sessions',
         icon: 'laptop'
+      },
+      {
+        title: 'API Logs',
+        shortcut: ['a', 'l'],
+        url: '/dashboard/admin/api-logs',
+        icon: 'billing'
       }
     ]
   },

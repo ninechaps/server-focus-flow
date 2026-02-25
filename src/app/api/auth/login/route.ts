@@ -5,6 +5,13 @@ import { createSessionAndTokens, sanitizeUser } from '@/server/auth/session';
 import * as userRepo from '@/server/repositories/user-repository';
 import { successResponse, errorResponse } from '@/server/api-response';
 import { decryptPassword } from '@/server/auth/rsa';
+import type { ClientSource } from '@/server/auth/middleware';
+
+function extractClientSource(req: NextRequest): ClientSource {
+  const clientType = req.headers.get('x-client-type');
+  if (clientType === 'macos-app') return 'macos-app';
+  return 'web-dashboard';
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +47,13 @@ export async function POST(req: NextRequest) {
       return errorResponse('Invalid email or password', 401);
     }
 
+    const clientSource = extractClientSource(req);
+
+    // macOS 客户端登录额外校验
+    if (clientSource === 'macos-app' && !user.clientLoginEnabled) {
+      return errorResponse('Client login disabled for this account', 403);
+    }
+
     await userRepo.updateLastLogin(user.id);
 
     const ipAddress =
@@ -53,7 +67,8 @@ export async function POST(req: NextRequest) {
       deviceName,
       deviceType,
       ipAddress: ipAddress ?? undefined,
-      userAgent: userAgent ?? undefined
+      userAgent: userAgent ?? undefined,
+      clientSource
     });
 
     return successResponse({

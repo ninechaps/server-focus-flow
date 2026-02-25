@@ -1,7 +1,9 @@
 import { relations } from 'drizzle-orm';
 import {
+  boolean,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -26,14 +28,21 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
-  totalOnlineTime: integer('total_online_time').default(0)
+  totalOnlineTime: integer('total_online_time').default(0),
+  userType: varchar('user_type', { length: 20 }).notNull().default('client'),
+  clientLoginEnabled: boolean('client_login_enabled').notNull().default(true)
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   refreshTokens: many(refreshTokens),
   sessions: many(userSessions),
   syncData: many(syncData),
-  userRoles: many(userRoles)
+  userRoles: many(userRoles),
+  apiAccessLogs: many(apiAccessLogs),
+  clientSettings: one(clientSettings, {
+    fields: [users.id],
+    references: [clientSettings.userId]
+  })
 }));
 
 // ============================================================
@@ -186,7 +195,10 @@ export const userSessions = pgTable(
     }).defaultNow(),
     logoutAt: timestamp('logout_at', { withTimezone: true }),
     duration: integer('duration').default(0),
-    authMethod: varchar('auth_method', { length: 20 }).notNull()
+    authMethod: varchar('auth_method', { length: 20 }).notNull(),
+    clientSource: varchar('client_source', { length: 50 })
+      .notNull()
+      .default('unknown')
   },
   (table) => [
     index('idx_user_sessions_user_id').on(table.userId),
@@ -223,6 +235,69 @@ export const syncDataRelations = relations(syncData, ({ one }) => ({
 }));
 
 // ============================================================
+// api_access_logs: API 访问日志
+// ============================================================
+export const apiAccessLogs = pgTable(
+  'api_access_logs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => users.id, {
+      onDelete: 'set null'
+    }),
+    path: varchar('path', { length: 255 }).notNull(),
+    method: varchar('method', { length: 10 }).notNull(),
+    clientSource: varchar('client_source', { length: 50 })
+      .notNull()
+      .default('unknown'),
+    statusCode: integer('status_code').notNull(),
+    durationMs: integer('duration_ms').notNull(),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index('idx_api_access_logs_created_at').on(table.createdAt),
+    index('idx_api_access_logs_user_id').on(table.userId),
+    index('idx_api_access_logs_client_source').on(table.clientSource)
+  ]
+);
+
+export const apiAccessLogsRelations = relations(apiAccessLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [apiAccessLogs.userId],
+    references: [users.id]
+  })
+}));
+
+// ============================================================
+// client_settings: macOS 客户端用户设置（每人一行，JSONB 存储）
+// ============================================================
+export const clientSettings = pgTable('client_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  // 设置内容：JSONB 格式，结构见下方 ClientSettingsData 类型
+  settings: jsonb('settings').notNull().default({}),
+  // 乐观锁版本号：客户端提交时需携带当前版本，服务端版本不一致时拒绝覆盖
+  version: integer('version').notNull().default(1),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  // 客户端最后一次同步时间（由客户端拉取时更新）
+  syncedAt: timestamp('synced_at', { withTimezone: true })
+});
+
+export const clientSettingsRelations = relations(clientSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [clientSettings.userId],
+    references: [users.id]
+  })
+}));
+
+// ============================================================
 // Type exports
 // ============================================================
 export type User = typeof users.$inferSelect;
@@ -252,3 +327,36 @@ export type NewUserSession = typeof userSessions.$inferInsert;
 
 export type SyncData = typeof syncData.$inferSelect;
 export type NewSyncData = typeof syncData.$inferInsert;
+
+export type ApiAccessLog = typeof apiAccessLogs.$inferSelect;
+export type NewApiAccessLog = typeof apiAccessLogs.$inferInsert;
+
+export type ClientSettingsRow = typeof clientSettings.$inferSelect;
+export type NewClientSettings = typeof clientSettings.$inferInsert;
+
+/**
+ * JSONB 字段 settings 的结构定义
+ * 扩展设置时只需在这里添加字段，无需迁移数据库
+ */
+export interface ClientSettingsData {
+  focus?: {
+    defaultDuration?: number; // 专注时长（分钟），默认 25
+    shortBreak?: number; // 短休息时长，默认 5
+    longBreak?: number; // 长休息时长，默认 15
+    cyclesBeforeLong?: number; // 几个专注后进入长休息，默认 4
+    autoStartNext?: boolean; // 完成后自动开始下一个
+  };
+  notification?: {
+    enabled?: boolean; // 是否开启通知
+    sound?: boolean; // 是否有声音
+    volume?: number; // 音量 0-1
+  };
+  appearance?: {
+    theme?: 'light' | 'dark' | 'system';
+    menuBarOnly?: boolean; // 仅在菜单栏显示，不在 Dock 显示
+  };
+  behavior?: {
+    launchAtLogin?: boolean; // 登录时自动启动
+    blockApps?: string[]; // 专注时屏蔽的应用 bundle ID 列表
+  };
+}

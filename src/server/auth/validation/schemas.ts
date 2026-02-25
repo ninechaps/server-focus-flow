@@ -93,3 +93,50 @@ export type LogoutInput = z.infer<typeof logoutSchema>;
 export type HeartbeatInput = z.infer<typeof heartbeatSchema>;
 export type SyncUploadInput = z.infer<typeof syncUploadSchema>;
 export type StatsUpdateInput = z.infer<typeof statsUpdateSchema>;
+
+export const updateProfileSchema = z
+  .object({
+    fullName: z
+      .string()
+      .max(255, 'Full name must be at most 255 characters')
+      .nullable()
+      .optional(),
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(100, 'Username must be at most 100 characters')
+      .regex(
+        /^[a-zA-Z0-9_-]+$/,
+        'Username can only contain letters, numbers, underscores, and hyphens'
+      )
+      .nullable()
+      .optional()
+  })
+  .refine(
+    (data) => data.fullName !== undefined || data.username !== undefined,
+    { message: 'At least one field is required' }
+  );
+
+export const updateAvatarSchema = z.object({
+  // data URL（base64）或外部 URL
+  avatarUrl: z
+    .string()
+    .max(2 * 1024 * 1024, 'Avatar data exceeds 2MB limit')
+    .refine(
+      (v) => v.startsWith('data:image/') || v.startsWith('https://'),
+      'Must be a valid image data URL or https URL'
+    )
+    .nullable()
+});
+
+export const changePasswordSchema = z.object({
+  currentEncryptedPassword: z
+    .string()
+    .min(1, 'Current password is required')
+    .max(512),
+  newEncryptedPassword: z.string().min(1, 'New password is required').max(512)
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type UpdateAvatarInput = z.infer<typeof updateAvatarSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { apiClient } from '@/lib/api-client';
 
 const INTERVAL_MS = 2 * 60 * 1000; // 2 分钟，低于服务端 5 分钟在线阈值
 
@@ -12,7 +13,7 @@ export function useHeartbeat(sessionId: string | null) {
     async function beat() {
       if (document.visibilityState === 'hidden') return;
       try {
-        await fetch('/api/sessions/heartbeat', {
+        await apiClient('/api/sessions/heartbeat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId })

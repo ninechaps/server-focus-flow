@@ -1,12 +1,18 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken, type AccessTokenPayload } from './jwt';
 import { errorResponse } from '@/server/api-response';
-import { getUserPermissions } from '@/server/repositories/user-repository';
+import {
+  getUserPermissions,
+  findById
+} from '@/server/repositories/user-repository';
+
+export type ClientSource = 'macos-app' | 'web-dashboard' | 'unknown';
 
 export interface AuthContext {
   userId: string;
   email: string;
   permissions: string[];
+  clientSource: ClientSource;
 }
 
 type AuthenticatedHandler = (
@@ -20,6 +26,13 @@ function extractToken(req: NextRequest): string | null {
     return header.slice(7);
   }
   return req.cookies.get('access_token')?.value ?? null;
+}
+
+function extractClientSource(req: NextRequest): ClientSource {
+  const clientType = req.headers.get('x-client-type');
+  if (clientType === 'macos-app') return 'macos-app';
+  if (clientType === 'web-dashboard') return 'web-dashboard';
+  return 'web-dashboard';
 }
 
 export function withJwtAuth(handler: AuthenticatedHandler) {
@@ -43,7 +56,8 @@ export function withJwtAuth(handler: AuthenticatedHandler) {
     const ctx: AuthContext = {
       userId: payload.sub,
       email: payload.email,
-      permissions: payload.permissions ?? []
+      permissions: payload.permissions ?? [],
+      clientSource: extractClientSource(req)
     };
 
     return handler(req, ctx);
@@ -76,5 +90,29 @@ export function withAdminPermission(
       return errorResponse('Forbidden', 403);
     }
     return handler(req, { ...ctx, permissions: dbPermissions });
+  });
+}
+
+/**
+ * macOS 客户端专用中间件：
+ * 1. 确认请求来自 macos-app
+ * 2. 检查用户 clientLoginEnabled 是否为 true（管理员单独控制的开关）
+ */
+export function withClientAuth(handler: AuthenticatedHandler) {
+  return withJwtAuth(async (req, ctx) => {
+    if (ctx.clientSource !== 'macos-app') {
+      return errorResponse('This endpoint is for macOS client only', 403);
+    }
+
+    const user = await findById(ctx.userId);
+    if (!user) {
+      return errorResponse('User not found', 404);
+    }
+
+    if (!user.clientLoginEnabled) {
+      return errorResponse('Client login disabled for this account', 403);
+    }
+
+    return handler(req, ctx);
   });
 }

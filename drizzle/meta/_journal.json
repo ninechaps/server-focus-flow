@@ -15,6 +15,20 @@
       "when": 1771226490998,
       "tag": "0001_chilly_loki",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771904643945,
+      "tag": "0002_complex_cannonball",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1771943002828,
+      "tag": "0003_yellow_nekra",
+      "breakpoints": true
     }
   ]
 }

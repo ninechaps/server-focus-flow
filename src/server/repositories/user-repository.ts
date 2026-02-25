@@ -24,6 +24,13 @@ export async function findById(id: string): Promise<User | null> {
   return result ?? null;
 }
 
+export async function findByUsername(username: string): Promise<User | null> {
+  const result = await db.query.users.findFirst({
+    where: eq(users.username, username)
+  });
+  return result ?? null;
+}
+
 export async function findByClerkId(clerkId: string): Promise<User | null> {
   const result = await db.query.users.findFirst({
     where: eq(users.clerkUserId, clerkId)

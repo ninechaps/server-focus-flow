@@ -1,3 +1,4 @@
+import { apiClient } from '@/lib/api-client';
 interface CachedKey {
   value: string;
   expiresAt: number;
@@ -12,7 +13,7 @@ async function fetchPublicKey(): Promise<string> {
     return cachedPublicKey.value;
   }
 
-  const res = await fetch('/api/auth/public-key');
+  const res = await apiClient('/api/auth/public-key');
 
   if (!res.ok) {
     throw new Error(`Failed to fetch public key: HTTP ${res.status}`);

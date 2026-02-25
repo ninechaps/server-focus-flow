@@ -14,6 +14,7 @@ interface DeviceInfo {
   deviceType?: string;
   ipAddress?: string;
   userAgent?: string;
+  clientSource?: string;
 }
 
 interface TokenResult {
@@ -61,7 +62,8 @@ export async function createSessionAndTokens(
       deviceType: device.deviceType,
       ipAddress: device.ipAddress,
       userAgent: device.userAgent,
-      authMethod
+      authMethod,
+      clientSource: device.clientSource ?? 'unknown'
     })
     .returning();
 
