@@ -1,0 +1,29 @@
+# 依赖和构建产物
+node_modules
+.next
+
+# 环境变量（敏感信息不进入镜像）
+.env*
+!env.example.txt
+
+# Git
+.git
+.gitignore
+
+# 开发工具
+.vscode
+.idea
+*.log
+
+# 测试和文档
+docs
+__CLEANUP__
+README.md
+AGENTS.md
+CLAUDE.md
+
+# macOS
+.DS_Store
+
+# Husky
+.husky

@@ -1,0 +1,58 @@
+services:
+  # ── PostgreSQL 数据库 ────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: focusflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: focusflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d focusflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5433:5432"   # 映射到 5433 避免与本机 5432 冲突
+
+  # ── 数据库初始化 ─────────────────────────────────────────────────
+  # drizzle-kit migrate：执行 drizzle/ 下的 SQL 文件，写入 __drizzle_migrations
+  # 追踪表。app 启动时 instrumentation.ts 的 runMigrations() 会检测到"已完成"
+  # 并跳过，不会出现"relation already exists"冲突。
+  migrate:
+    build:
+      context: .
+      target: migrator
+    container_name: focusflow-migrate
+    env_file: .env.docker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/focusflow
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # ── Next.js 应用服务器 ───────────────────────────────────────────
+  app:
+    build:
+      context: .
+      target: runner
+    container_name: focusflow-app
+    restart: unless-stopped
+    env_file: .env.docker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/focusflow
+    ports:
+      - "3002:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    name: focusflow-postgres-data

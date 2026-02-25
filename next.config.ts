@@ -4,6 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 // Define the base Next.js configuration
 const baseConfig: NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
