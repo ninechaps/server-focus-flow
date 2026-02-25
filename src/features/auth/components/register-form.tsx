@@ -19,7 +19,9 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 import { encryptPassword } from '@/lib/crypto';
+import { apiClient } from '@/lib/api-client';
 
 type Step = 'email' | 'code' | 'password' | 'success';
 
@@ -28,6 +30,8 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
+  const t = useTranslations('auth.register');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -41,7 +45,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/send-code', {
+      const res = await apiClient('/api/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, purpose: 'register' })
@@ -54,10 +58,10 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
         return;
       }
 
-      toast.success('Verification code sent to your email');
+      toast.success(t('codeSentToast'));
       setStep('code');
     } catch {
-      toast.error('Network error, please try again');
+      toast.error(tCommon('networkError'));
     } finally {
       setLoading(false);
     }
@@ -71,7 +75,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('passwordsDoNotMatch'));
       return;
     }
 
@@ -84,7 +88,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
 
       const encryptedPassword = await encryptPassword(password);
 
-      const res = await fetch(endpoint, {
+      const res = await apiClient(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code, encryptedPassword })
@@ -98,14 +102,14 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
       }
 
       if (source === 'client') {
-        toast.success('Registration successful');
+        toast.success(t('successToast'));
         setStep('success');
       } else {
-        toast.success('Registration successful');
+        toast.success(t('successToast'));
         router.push('/dashboard/overview');
       }
     } catch {
-      toast.error('Network error, please try again');
+      toast.error(tCommon('networkError'));
     } finally {
       setLoading(false);
     }
@@ -114,12 +118,12 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-2xl'>Register</CardTitle>
+        <CardTitle className='text-2xl'>{t('title')}</CardTitle>
         <CardDescription>
-          {step === 'email' && 'Enter your email to get started'}
-          {step === 'code' && 'Enter the verification code sent to your email'}
-          {step === 'password' && 'Set your password to complete registration'}
-          {step === 'success' && 'Your account is ready'}
+          {step === 'email' && t('descriptionEmail')}
+          {step === 'code' && t('descriptionCode')}
+          {step === 'password' && t('descriptionPassword')}
+          {step === 'success' && t('descriptionSuccess')}
         </CardDescription>
       </CardHeader>
 
@@ -127,11 +131,11 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
         <form onSubmit={handleSendCode}>
           <CardContent className='flex flex-col gap-6'>
             <div className='flex flex-col gap-2'>
-              <Label htmlFor='email'>Email</Label>
+              <Label htmlFor='email'>{t('emailLabel')}</Label>
               <Input
                 id='email'
                 type='email'
-                placeholder='name@example.com'
+                placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -141,15 +145,15 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
             </div>
             <div className='flex flex-col gap-3'>
               <Button type='submit' className='w-full' disabled={loading}>
-                {loading ? 'Sending...' : 'Send Verification Code'}
+                {loading ? t('sending') : t('sendCode')}
               </Button>
               <p className='text-muted-foreground text-center text-sm'>
-                Already have an account?{' '}
+                {t('alreadyHaveAccount')}{' '}
                 <Link
                   href='/auth/login'
                   className='text-primary underline-offset-4 hover:underline'
                 >
-                  Sign in
+                  {t('signIn')}
                 </Link>
               </p>
             </div>
@@ -166,7 +170,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
         >
           <CardContent className='flex flex-col gap-6'>
             <div className='flex flex-col items-center gap-3'>
-              <Label>Verification Code</Label>
+              <Label>{t('verificationCode')}</Label>
               <InputOTP
                 maxLength={6}
                 value={code}
@@ -183,7 +187,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                 </InputOTPGroup>
               </InputOTP>
               <p className='text-muted-foreground text-xs'>
-                Code sent to {email}
+                {t('codeSentTo', { email })}
               </p>
             </div>
             <div className='flex flex-col gap-3'>
@@ -192,7 +196,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                 className='w-full'
                 disabled={code.length !== 6}
               >
-                Verify Code
+                {t('verifyCode')}
               </Button>
               <Button
                 type='button'
@@ -200,7 +204,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                 className='w-full'
                 onClick={() => setStep('email')}
               >
-                Back
+                {tCommon('back')}
               </Button>
             </div>
           </CardContent>
@@ -212,7 +216,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
           <CardContent className='flex flex-col gap-6'>
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='password'>Password</Label>
+                <Label htmlFor='password'>{t('passwordLabel')}</Label>
                 <Input
                   id='password'
                   type='password'
@@ -223,11 +227,13 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                   autoFocus
                 />
                 <p className='text-muted-foreground text-xs'>
-                  At least 8 characters with uppercase, lowercase, and number
+                  {t('passwordHint')}
                 </p>
               </div>
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='confirm-password'>Confirm Password</Label>
+                <Label htmlFor='confirm-password'>
+                  {t('confirmPasswordLabel')}
+                </Label>
                 <Input
                   id='confirm-password'
                   type='password'
@@ -240,7 +246,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
             </div>
             <div className='flex flex-col gap-3'>
               <Button type='submit' className='w-full' disabled={loading}>
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? t('creatingAccount') : t('createAccount')}
               </Button>
               <Button
                 type='button'
@@ -248,7 +254,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
                 className='w-full'
                 onClick={() => setStep('code')}
               >
-                Back
+                {tCommon('back')}
               </Button>
             </div>
           </CardContent>
@@ -261,6 +267,7 @@ export function RegisterForm({ source = 'dashboard' }: RegisterFormProps) {
 }
 
 function SuccessCountdown() {
+  const t = useTranslations('auth.register');
   const [countdown, setCountdown] = useState(5);
 
   const handleClose = useCallback(() => {
@@ -298,16 +305,16 @@ function SuccessCountdown() {
         </svg>
       </div>
       <div className='text-center'>
-        <p className='text-lg font-semibold'>Registration Successful</p>
+        <p className='text-lg font-semibold'>{t('successTitle')}</p>
         <p className='text-muted-foreground mt-1 text-sm'>
-          Your account has been created. You can now log in from the app.
+          {t('successMessage')}
         </p>
       </div>
       <p className='text-muted-foreground text-sm'>
-        This page will close in {countdown} seconds
+        {t('closeCountdown', { countdown })}
       </p>
       <Button variant='outline' onClick={handleClose}>
-        Close Now
+        {t('closeNow')}
       </Button>
     </CardContent>
   );

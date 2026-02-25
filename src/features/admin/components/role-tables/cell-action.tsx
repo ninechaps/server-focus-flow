@@ -22,8 +22,10 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { RoleFormDialog } from '../role-form-dialog';
 import type { AdminRole } from './columns';
+import { apiClient } from '@/lib/api-client';
 
 const SYSTEM_ROLES = ['owner'];
 
@@ -33,6 +35,8 @@ interface CellActionProps {
 }
 
 export function CellAction({ data, allPermissions }: CellActionProps) {
+  const t = useTranslations('admin.roles.cellAction');
+  const tCommon = useTranslations('common');
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
@@ -47,28 +51,27 @@ export function CellAction({ data, allPermissions }: CellActionProps) {
             <IconLock className='h-4 w-4' />
           </span>
         </TooltipTrigger>
-        <TooltipContent>System role — cannot be modified</TooltipContent>
+        <TooltipContent>{t('systemRole')}</TooltipContent>
       </Tooltip>
     );
   }
 
   async function handleDelete() {
-    if (!confirm(`Are you sure you want to delete role "${data.name}"?`))
-      return;
+    if (!confirm(t('confirmDelete', { name: data.name }))) return;
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/roles/${data.id}`, {
+      const res = await apiClient(`/api/admin/roles/${data.id}`, {
         method: 'DELETE'
       });
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error ?? 'Failed to delete role');
+        throw new Error(body.error ?? t('deleteFailed'));
       }
-      toast.success(`Role "${data.name}" deleted`);
+      toast.success(t('deleteSuccess', { name: data.name }));
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Delete failed');
+      toast.error(error instanceof Error ? error.message : t('deleteFailed'));
     } finally {
       setDeleting(false);
     }
@@ -90,9 +93,9 @@ export function CellAction({ data, allPermissions }: CellActionProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>{tCommon('actions')}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <IconEdit className='mr-2 h-4 w-4' /> Edit
+            <IconEdit className='mr-2 h-4 w-4' /> {t('edit')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -101,7 +104,7 @@ export function CellAction({ data, allPermissions }: CellActionProps) {
             className='text-destructive'
           >
             <IconTrash className='mr-2 h-4 w-4' />
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? tCommon('deleting') : t('delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

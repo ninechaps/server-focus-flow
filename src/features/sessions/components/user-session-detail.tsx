@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -16,6 +17,7 @@ import {
   IconDeviceDesktop,
   IconDeviceMobile
 } from '@tabler/icons-react';
+import { apiClient } from '@/lib/api-client';
 
 export interface SessionDetail {
   id: string;
@@ -75,6 +77,7 @@ export function UserSessionDetail({
   userId,
   userEmail
 }: UserSessionDetailProps) {
+  const t = useTranslations('sessions');
   const [sessions, setSessions] = useState<SessionDetail[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>('online');
@@ -85,13 +88,13 @@ export function UserSessionDetail({
     setLoading(true);
     setFilter('online');
 
-    fetch(`/api/admin/sessions/users/${userId}`)
+    apiClient(`/api/admin/sessions/users/${userId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch');
         return res.json();
       })
       .then((json) => setSessions(json.data.sessions))
-      .catch(() => toast.error('Failed to load sessions'))
+      .catch(() => toast.error(t('loadFailed')))
       .finally(() => setLoading(false));
   }, [open, userId]);
 
@@ -110,7 +113,7 @@ export function UserSessionDetail({
       <SheetContent className='flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl'>
         {/* Header */}
         <SheetHeader className='px-6 pt-6 pb-4'>
-          <SheetTitle>Sessions</SheetTitle>
+          <SheetTitle>{t('title')}</SheetTitle>
           <SheetDescription className='truncate'>{userEmail}</SheetDescription>
         </SheetHeader>
 
@@ -130,7 +133,7 @@ export function UserSessionDetail({
             </Button>
           ))}
           <span className='text-muted-foreground ml-auto text-sm'>
-            {filtered.length} record{filtered.length !== 1 ? 's' : ''}
+            {t('records', { count: filtered.length })}
           </span>
         </div>
 
@@ -149,7 +152,7 @@ export function UserSessionDetail({
             </div>
           ) : filtered.length === 0 ? (
             <p className='text-muted-foreground py-8 text-center text-sm'>
-              No sessions found.
+              {t('noSessionsFound')}
             </p>
           ) : (
             <div className='space-y-3'>
@@ -162,17 +165,17 @@ export function UserSessionDetail({
                       <div className='min-w-0 flex-1'>
                         <div className='flex items-center gap-2'>
                           <span className='text-sm font-medium'>
-                            {session.deviceName ?? 'Unknown Device'}
+                            {session.deviceName ?? t('deviceUnknown')}
                           </span>
                           <Badge
                             variant={session.isOnline ? 'default' : 'secondary'}
                             className='text-xs'
                           >
-                            {session.isOnline ? 'Online' : 'Offline'}
+                            {session.isOnline ? t('online') : t('offline')}
                           </Badge>
                         </div>
                         <div className='text-muted-foreground mt-0.5 flex flex-wrap gap-x-3 text-xs'>
-                          <span>{session.ipAddress ?? 'Unknown IP'}</span>
+                          <span>{session.ipAddress ?? t('ipUnknown')}</span>
                           <span className='uppercase'>
                             {session.authMethod}
                           </span>
@@ -181,17 +184,21 @@ export function UserSessionDetail({
                     </div>
                     <div className='text-muted-foreground mt-3 grid grid-cols-3 gap-2 text-xs'>
                       <div>
-                        <p className='text-foreground font-medium'>Login</p>
+                        <p className='text-foreground font-medium'>
+                          {t('login')}
+                        </p>
                         <p>{formatDate(session.loginAt)}</p>
                       </div>
                       <div>
                         <p className='text-foreground font-medium'>
-                          Last Active
+                          {t('lastActive')}
                         </p>
                         <p>{formatDate(session.lastActiveAt)}</p>
                       </div>
                       <div>
-                        <p className='text-foreground font-medium'>Duration</p>
+                        <p className='text-foreground font-medium'>
+                          {t('duration')}
+                        </p>
                         <p>{formatDuration(session.duration)}</p>
                       </div>
                     </div>

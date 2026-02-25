@@ -15,9 +15,13 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 import { encryptPassword } from '@/lib/crypto';
+import { apiClient } from '@/lib/api-client';
 
 export function LoginForm() {
+  const t = useTranslations('auth.login');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +35,7 @@ export function LoginForm() {
     try {
       const encryptedPassword = await encryptPassword(password);
 
-      const res = await fetch('/api/auth/session', {
+      const res = await apiClient('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, encryptedPassword, rememberMe })
@@ -44,10 +48,10 @@ export function LoginForm() {
         return;
       }
 
-      toast.success('Login successful');
+      toast.success(t('successToast'));
       router.push('/dashboard/overview');
     } catch {
-      toast.error('Network error, please try again');
+      toast.error(tCommon('networkError'));
     } finally {
       setLoading(false);
     }
@@ -56,20 +60,18 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-2xl'>Login</CardTitle>
-        <CardDescription>
-          Enter your email and password to sign in
-        </CardDescription>
+        <CardTitle className='text-2xl'>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className='flex flex-col gap-6'>
           <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-2'>
-              <Label htmlFor='email'>Email</Label>
+              <Label htmlFor='email'>{t('emailLabel')}</Label>
               <Input
                 id='email'
                 type='email'
-                placeholder='name@example.com'
+                placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -78,7 +80,7 @@ export function LoginForm() {
               />
             </div>
             <div className='flex flex-col gap-2'>
-              <Label htmlFor='password'>Password</Label>
+              <Label htmlFor='password'>{t('passwordLabel')}</Label>
               <Input
                 id='password'
                 type='password'
@@ -96,20 +98,20 @@ export function LoginForm() {
               onCheckedChange={(checked) => setRememberMe(checked === true)}
             />
             <Label htmlFor='rememberMe' className='cursor-pointer text-sm'>
-              记住我
+              {t('rememberMe')}
             </Label>
           </div>
           <div className='flex flex-col gap-3'>
             <Button type='submit' className='w-full' disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('signingIn') : t('signIn')}
             </Button>
             <p className='text-muted-foreground text-center text-sm'>
-              Don&apos;t have an account?{' '}
+              {t('noAccount')}{' '}
               <Link
                 href='/auth/register'
                 className='text-primary underline-offset-4 hover:underline'
               >
-                Register
+                {t('register')}
               </Link>
             </p>
           </div>

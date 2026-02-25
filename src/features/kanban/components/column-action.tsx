@@ -1,6 +1,7 @@
 'use client';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   AlertDialog,
@@ -31,6 +32,8 @@ export function ColumnActions({
   title: string;
   id: UniqueIdentifier;
 }) {
+  const t = useTranslations('kanban.columnActions');
+  const tCommon = useTranslations('common');
   const [name, setName] = React.useState(title);
   const updateCol = useTaskStore((state) => state.updateCol);
   const removeCol = useTaskStore((state) => state.removeCol);
@@ -72,7 +75,7 @@ export function ColumnActions({
               }, 500);
             }}
           >
-            Rename
+            {t('rename')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
 
@@ -80,22 +83,20 @@ export function ColumnActions({
             onSelect={() => setShowDeleteDialog(true)}
             className='text-red-600'
           >
-            Delete Section
+            {t('deleteSection')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Are you sure want to delete column?
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              NOTE: All tasks related to this category will also be deleted.
+              {t('confirmDeleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
             <Button
               variant='destructive'
               onClick={() => {
@@ -104,10 +105,10 @@ export function ColumnActions({
 
                 setShowDeleteDialog(false);
                 removeCol(id);
-                toast('This column has been deleted.');
+                toast(t('deleted'));
               }}
             >
-              Delete
+              {tCommon('delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

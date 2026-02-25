@@ -27,32 +27,33 @@ function formatDate(date: Date | null): string {
 
 interface CreateColumnsOptions {
   onViewUsers: (role: AdminRole) => void;
+  t: (key: string) => string;
 }
 
 export function createColumns(
   allPermissions: { id: string; code: string }[],
-  { onViewUsers }: CreateColumnsOptions
+  { onViewUsers, t }: CreateColumnsOptions
 ): ColumnDef<AdminRole>[] {
   return [
     {
       id: 'name',
       accessorKey: 'name',
       header: ({ column }: { column: Column<AdminRole, unknown> }) => (
-        <DataTableColumnHeader column={column} title='Name' />
+        <DataTableColumnHeader column={column} title={t('name')} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-2'>
           <span className='font-medium'>{row.original.name}</span>
           {SYSTEM_ROLES.includes(row.original.name) && (
             <Badge variant='outline' className='text-xs'>
-              System
+              {t('systemBadge')}
             </Badge>
           )}
         </div>
       ),
       meta: {
-        label: 'Name',
-        placeholder: 'Search by name...',
+        label: t('name'),
+        placeholder: t('namePlaceholder'),
         variant: 'text' as const,
         icon: Text
       },
@@ -60,7 +61,7 @@ export function createColumns(
     },
     {
       accessorKey: 'description',
-      header: 'Description',
+      header: t('description'),
       cell: ({ cell }) => (
         <div className='text-muted-foreground max-w-[300px] truncate text-sm'>
           {cell.getValue<string | null>() ?? '-'}
@@ -69,7 +70,7 @@ export function createColumns(
     },
     {
       accessorKey: 'permissions',
-      header: 'Permissions',
+      header: t('permissions'),
       cell: ({ cell }) => {
         const perms = cell.getValue<string[]>();
         return (
@@ -88,7 +89,7 @@ export function createColumns(
     },
     {
       accessorKey: 'userCount',
-      header: 'Users',
+      header: t('userCount'),
       cell: ({ row }) => {
         const count = row.original.userCount;
         return (
@@ -113,7 +114,7 @@ export function createColumns(
     {
       accessorKey: 'createdAt',
       header: ({ column }: { column: Column<AdminRole, unknown> }) => (
-        <DataTableColumnHeader column={column} title='Created At' />
+        <DataTableColumnHeader column={column} title={t('createdAt')} />
       ),
       cell: ({ cell }) => (
         <div className='text-sm'>

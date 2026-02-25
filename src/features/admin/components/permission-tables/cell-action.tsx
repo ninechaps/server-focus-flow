@@ -12,35 +12,38 @@ import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { PermissionFormDialog } from '../permission-form-dialog';
 import type { AdminPermission } from './columns';
+import { apiClient } from '@/lib/api-client';
 
 interface CellActionProps {
   data: AdminPermission;
 }
 
 export function CellAction({ data }: CellActionProps) {
+  const t = useTranslations('admin.permissions.cellAction');
+  const tCommon = useTranslations('common');
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   async function handleDelete() {
-    if (!confirm(`Are you sure you want to delete permission "${data.code}"?`))
-      return;
+    if (!confirm(t('confirmDelete', { code: data.code }))) return;
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/permissions/${data.id}`, {
+      const res = await apiClient(`/api/admin/permissions/${data.id}`, {
         method: 'DELETE'
       });
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error ?? 'Failed to delete permission');
+        throw new Error(body.error ?? t('deleteFailed'));
       }
-      toast.success(`Permission "${data.code}" deleted`);
+      toast.success(t('deleteSuccess', { code: data.code }));
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Delete failed');
+      toast.error(error instanceof Error ? error.message : t('deleteFailed'));
     } finally {
       setDeleting(false);
     }
@@ -61,9 +64,9 @@ export function CellAction({ data }: CellActionProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>{tCommon('actions')}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <IconEdit className='mr-2 h-4 w-4' /> Edit
+            <IconEdit className='mr-2 h-4 w-4' /> {t('edit')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -72,7 +75,7 @@ export function CellAction({ data }: CellActionProps) {
             className='text-destructive'
           >
             <IconTrash className='mr-2 h-4 w-4' />
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? tCommon('deleting') : t('delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

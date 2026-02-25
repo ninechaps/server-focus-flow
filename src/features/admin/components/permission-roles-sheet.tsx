@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -9,6 +10,7 @@ import {
   SheetDescription
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { apiClient } from '@/lib/api-client';
 
 interface RoleEntry {
   id: string;
@@ -29,6 +31,7 @@ export function PermissionRolesSheet({
   permissionId,
   permissionCode
 }: PermissionRolesSheetProps) {
+  const t = useTranslations('admin.permissions.rolesSheet');
   const [roles, setRoles] = useState<RoleEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -36,10 +39,10 @@ export function PermissionRolesSheet({
     if (!open || !permissionId) return;
 
     setLoading(true);
-    fetch(`/api/admin/permissions/${permissionId}/roles`)
+    apiClient(`/api/admin/permissions/${permissionId}/roles`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((json) => setRoles(json.data.roles))
-      .catch(() => toast.error('Failed to load roles'))
+      .catch(() => toast.error(t('noRoles')))
       .finally(() => setLoading(false));
   }, [open, permissionId]);
 
@@ -47,7 +50,7 @@ export function PermissionRolesSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md'>
         <SheetHeader className='px-6 pt-6 pb-4'>
-          <SheetTitle>Roles with this Permission</SheetTitle>
+          <SheetTitle>{t('title')}</SheetTitle>
           <SheetDescription className='font-mono text-xs'>
             {permissionCode}
           </SheetDescription>
@@ -65,7 +68,7 @@ export function PermissionRolesSheet({
             </div>
           ) : roles.length === 0 ? (
             <p className='text-muted-foreground py-8 text-center text-sm'>
-              No roles have this permission.
+              {t('noRoles')}
             </p>
           ) : (
             <div className='space-y-2'>

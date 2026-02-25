@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { IconTrendingUp } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import { Label, Pie, PieChart } from 'recharts';
-
 import {
   Card,
   CardContent,
@@ -19,54 +19,74 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart';
 
-const chartData = [
-  { browser: 'chrome', visitors: 275, fill: 'var(--primary)' },
-  { browser: 'safari', visitors: 200, fill: 'var(--primary-light)' },
-  { browser: 'firefox', visitors: 287, fill: 'var(--primary-lighter)' },
-  { browser: 'edge', visitors: 173, fill: 'var(--primary-dark)' },
-  { browser: 'other', visitors: 190, fill: 'var(--primary-darker)' }
+interface SourceStat {
+  source: string;
+  count: number;
+}
+
+interface PieGraphProps {
+  data: SourceStat[];
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  email: 'Email',
+  google: 'Google',
+  github: 'GitHub',
+  apple: 'Apple',
+  unknown: 'Other'
+};
+
+const MOCK_DATA: SourceStat[] = [
+  { source: 'email', count: 120 },
+  { source: 'google', count: 58 },
+  { source: 'github', count: 34 }
 ];
 
-const chartConfig = {
-  visitors: {
-    label: 'Visitors'
-  },
-  chrome: {
-    label: 'Chrome',
-    color: 'var(--primary)'
-  },
-  safari: {
-    label: 'Safari',
-    color: 'var(--primary)'
-  },
-  firefox: {
-    label: 'Firefox',
-    color: 'var(--primary)'
-  },
-  edge: {
-    label: 'Edge',
-    color: 'var(--primary)'
-  },
-  other: {
-    label: 'Other',
-    color: 'var(--primary)'
-  }
-} satisfies ChartConfig;
+const GRADIENT_IDS = ['fill0', 'fill1', 'fill2', 'fill3', 'fill4'];
+const OPACITIES = [1, 0.85, 0.7, 0.55, 0.4];
 
-export function PieGraph() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+export function PieGraph({ data }: PieGraphProps) {
+  const t = useTranslations('overview.pieGraph');
+  const sourceData = data.length === 0 ? MOCK_DATA : data;
+
+  const chartData = React.useMemo(
+    () =>
+      sourceData.map((d, i) => ({
+        name: SOURCE_LABELS[d.source] ?? d.source,
+        value: Number(d.count),
+        fill: `url(#${GRADIENT_IDS[i] ?? GRADIENT_IDS[GRADIENT_IDS.length - 1]})`
+      })),
+    [sourceData]
+  );
+
+  const chartConfig = React.useMemo(() => {
+    const cfg: ChartConfig = { value: { label: 'Users' } };
+    chartData.forEach((d) => {
+      cfg[d.name] = { label: d.name, color: 'var(--primary)' };
+    });
+    return cfg;
+  }, [chartData]);
+
+  const totalUsers = React.useMemo(
+    () => chartData.reduce((s, d) => s + d.value, 0),
+    [chartData]
+  );
+
+  const topSource = chartData[0];
+  const topPct =
+    totalUsers > 0 && topSource
+      ? ((topSource.value / totalUsers) * 100).toFixed(1)
+      : '0.0';
 
   return (
     <Card className='@container/card'>
       <CardHeader>
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
           <span className='hidden @[540px]/card:block'>
-            Total visitors by browser for the last 6 months
+            {t('descriptionFull')}
           </span>
-          <span className='@[540px]/card:hidden'>Browser distribution</span>
+          <span className='@[540px]/card:hidden'>{t('descriptionShort')}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className='px-2 pt-4 sm:px-6 sm:pt-6'>
@@ -76,41 +96,36 @@ export function PieGraph() {
         >
           <PieChart>
             <defs>
-              {['chrome', 'safari', 'firefox', 'edge', 'other'].map(
-                (browser, index) => (
-                  <linearGradient
-                    key={browser}
-                    id={`fill${browser}`}
-                    x1='0'
-                    y1='0'
-                    x2='0'
-                    y2='1'
-                  >
-                    <stop
-                      offset='0%'
-                      stopColor='var(--primary)'
-                      stopOpacity={1 - index * 0.15}
-                    />
-                    <stop
-                      offset='100%'
-                      stopColor='var(--primary)'
-                      stopOpacity={0.8 - index * 0.15}
-                    />
-                  </linearGradient>
-                )
-              )}
+              {chartData.map((_, i) => (
+                <linearGradient
+                  key={i}
+                  id={GRADIENT_IDS[i]}
+                  x1='0'
+                  y1='0'
+                  x2='0'
+                  y2='1'
+                >
+                  <stop
+                    offset='0%'
+                    stopColor='var(--primary)'
+                    stopOpacity={OPACITIES[i] ?? 0.3}
+                  />
+                  <stop
+                    offset='100%'
+                    stopColor='var(--primary)'
+                    stopOpacity={(OPACITIES[i] ?? 0.3) - 0.1}
+                  />
+                </linearGradient>
+              ))}
             </defs>
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData.map((item) => ({
-                ...item,
-                fill: `url(#fill${item.browser})`
-              }))}
-              dataKey='visitors'
-              nameKey='browser'
+              data={chartData}
+              dataKey='value'
+              nameKey='name'
               innerRadius={60}
               strokeWidth={2}
               stroke='var(--background)'
@@ -130,14 +145,14 @@ export function PieGraph() {
                           y={viewBox.cy}
                           className='fill-foreground text-3xl font-bold'
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalUsers.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className='fill-muted-foreground text-sm'
                         >
-                          Total Visitors
+                          {t('totalUsers')}
                         </tspan>
                       </text>
                     );
@@ -149,14 +164,17 @@ export function PieGraph() {
         </ChartContainer>
       </CardContent>
       <CardFooter className='flex-col gap-2 text-sm'>
-        <div className='flex items-center gap-2 leading-none font-medium'>
-          Chrome leads with{' '}
-          {((chartData[0].visitors / totalVisitors) * 100).toFixed(1)}%{' '}
-          <IconTrendingUp className='h-4 w-4' />
-        </div>
-        <div className='text-muted-foreground leading-none'>
-          Based on data from January - June 2024
-        </div>
+        {topSource && (
+          <>
+            <div className='flex items-center gap-2 leading-none font-medium'>
+              {t('leadsWith', { source: topSource.name, pct: topPct })}{' '}
+              <IconTrendingUp className='h-4 w-4' />
+            </div>
+            <div className='text-muted-foreground leading-none'>
+              {t('basedOn', { total: totalUsers.toLocaleString() })}
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
   );

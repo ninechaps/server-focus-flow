@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { IconDotsVertical, IconEye, IconShield } from '@tabler/icons-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { UserDetailDialog } from '../user-detail-dialog';
 import { UserAssignRolesDialog } from '../user-assign-roles-dialog';
 import type { AdminUser } from './columns';
@@ -20,6 +21,8 @@ interface CellActionProps {
 }
 
 export function CellAction({ data, canAssignRoles }: CellActionProps) {
+  const t = useTranslations('admin.users.cellAction');
+  const tCommon = useTranslations('common');
   const [detailOpen, setDetailOpen] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
 
@@ -46,15 +49,15 @@ export function CellAction({ data, canAssignRoles }: CellActionProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>{tCommon('actions')}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setDetailOpen(true)}>
-            <IconEye className='mr-2 h-4 w-4' /> View Details
+            <IconEye className='mr-2 h-4 w-4' /> {t('viewDetail')}
           </DropdownMenuItem>
           {canAssignRoles && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setRolesOpen(true)}>
-                <IconShield className='mr-2 h-4 w-4' /> Assign Roles
+                <IconShield className='mr-2 h-4 w-4' /> {t('assignRoles')}
               </DropdownMenuItem>
             </>
           )}

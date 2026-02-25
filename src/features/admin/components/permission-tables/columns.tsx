@@ -24,24 +24,26 @@ function formatDate(date: Date | null): string {
 
 interface CreateColumnsOptions {
   onViewRoles: (permission: AdminPermission) => void;
+  t: (key: string) => string;
 }
 
 export function createColumns({
-  onViewRoles
+  onViewRoles,
+  t
 }: CreateColumnsOptions): ColumnDef<AdminPermission>[] {
   return [
     {
       id: 'code',
       accessorKey: 'code',
       header: ({ column }: { column: Column<AdminPermission, unknown> }) => (
-        <DataTableColumnHeader column={column} title='Code' />
+        <DataTableColumnHeader column={column} title={t('code')} />
       ),
       cell: ({ cell }) => (
         <div className='font-mono font-medium'>{cell.getValue<string>()}</div>
       ),
       meta: {
-        label: 'Code',
-        placeholder: 'Search by code...',
+        label: t('code'),
+        placeholder: t('codePlaceholder'),
         variant: 'text' as const,
         icon: Text
       },
@@ -49,7 +51,7 @@ export function createColumns({
     },
     {
       accessorKey: 'description',
-      header: 'Description',
+      header: t('description'),
       cell: ({ cell }) => (
         <div className='text-muted-foreground max-w-[300px] truncate text-sm'>
           {cell.getValue<string | null>() ?? '-'}
@@ -58,7 +60,7 @@ export function createColumns({
     },
     {
       accessorKey: 'roleCount',
-      header: 'Roles',
+      header: t('roles'),
       cell: ({ row }) => {
         const count = row.original.roleCount;
         return (
@@ -83,7 +85,7 @@ export function createColumns({
     {
       accessorKey: 'createdAt',
       header: ({ column }: { column: Column<AdminPermission, unknown> }) => (
-        <DataTableColumnHeader column={column} title='Created At' />
+        <DataTableColumnHeader column={column} title={t('createdAt')} />
       ),
       cell: ({ cell }) => (
         <div className='text-sm'>

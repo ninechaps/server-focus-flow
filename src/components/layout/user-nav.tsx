@@ -14,16 +14,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { IconLogout, IconUser } from '@tabler/icons-react';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api-client';
+import { useTranslations } from 'next-intl';
 
 export function UserNav() {
   const router = useRouter();
+  const t = useTranslations('userNav');
 
   async function handleLogout() {
     try {
-      await fetch('/api/auth/session', { method: 'DELETE' });
+      await apiClient('/api/auth/session', { method: 'DELETE' });
       router.push('/auth/login');
     } catch {
-      toast.error('Logout failed');
+      toast.error(t('logoutFailed'));
     }
   }
 
@@ -39,20 +42,20 @@ export function UserNav() {
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm leading-none font-medium'>Account</p>
+            <p className='text-sm leading-none font-medium'>{t('account')}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href='/dashboard/profile'>
             <IconUser className='mr-2 h-4 w-4' />
-            Profile
+            {t('profile')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <IconLogout className='mr-2 h-4 w-4' />
-          Log out
+          {t('logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

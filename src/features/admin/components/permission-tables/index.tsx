@@ -7,6 +7,7 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import { PermissionFormDialog } from '../permission-form-dialog';
 import { PermissionRolesSheet } from '../permission-roles-sheet';
 import { createColumns, type AdminPermission } from './columns';
@@ -17,6 +18,8 @@ interface PermissionTableProps {
 }
 
 export function PermissionTable({ data, totalItems }: PermissionTableProps) {
+  const tCols = useTranslations('admin.permissions.columns');
+  const tForm = useTranslations('admin.permissions.form');
   const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(10));
   const pageCount = Math.ceil(totalItems / pageSize);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -24,8 +27,8 @@ export function PermissionTable({ data, totalItems }: PermissionTableProps) {
     useState<AdminPermission | null>(null);
 
   const columns = useMemo(
-    () => createColumns({ onViewRoles: setSelectedPermission }),
-    []
+    () => createColumns({ onViewRoles: setSelectedPermission, t: tCols }),
+    [tCols]
   );
 
   const { table } = useDataTable({
@@ -51,7 +54,7 @@ export function PermissionTable({ data, totalItems }: PermissionTableProps) {
         <DataTableToolbar table={table}>
           <Button size='sm' onClick={() => setDialogOpen(true)}>
             <IconPlus className='mr-1 h-4 w-4' />
-            Add Permission
+            {tForm('addTitle')}
           </Button>
         </DataTableToolbar>
       </DataTable>

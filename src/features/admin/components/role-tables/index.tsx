@@ -7,6 +7,7 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import { RoleFormDialog } from '../role-form-dialog';
 import { RoleUsersSheet } from '../role-users-sheet';
 import { createColumns, type AdminRole } from './columns';
@@ -22,14 +23,20 @@ export function RoleTable({
   totalItems,
   allPermissions
 }: RoleTableProps) {
+  const tCols = useTranslations('admin.roles.columns');
+  const tForm = useTranslations('admin.roles.form');
   const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(10));
   const pageCount = Math.ceil(totalItems / pageSize);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AdminRole | null>(null);
 
   const columns = useMemo(
-    () => createColumns(allPermissions, { onViewUsers: setSelectedRole }),
-    [allPermissions]
+    () =>
+      createColumns(allPermissions, {
+        onViewUsers: setSelectedRole,
+        t: tCols
+      }),
+    [allPermissions, tCols]
   );
 
   const { table } = useDataTable({
@@ -59,7 +66,7 @@ export function RoleTable({
         <DataTableToolbar table={table}>
           <Button size='sm' onClick={() => setDialogOpen(true)}>
             <IconPlus className='mr-1 h-4 w-4' />
-            Add Role
+            {tForm('addTitle')}
           </Button>
         </DataTableToolbar>
       </DataTable>

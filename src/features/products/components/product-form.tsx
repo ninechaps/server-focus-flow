@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useTranslations } from 'next-intl';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -50,6 +51,7 @@ export default function ProductForm({
   initialData: Product | null;
   pageTitle: string;
 }) {
+  const t = useTranslations('products.form');
   const defaultValues = {
     name: initialData?.name || '',
     category: initialData?.category || '',
@@ -86,8 +88,8 @@ export default function ProductForm({
           <FormFileUpload
             control={form.control}
             name='image'
-            label='Product Image'
-            description='Upload a product image'
+            label={t('imageLabel')}
+            description={t('imageDescription')}
             config={{
               maxSize: 5 * 1024 * 1024,
               maxFiles: 4
@@ -98,42 +100,30 @@ export default function ProductForm({
             <FormInput
               control={form.control}
               name='name'
-              label='Product Name'
-              placeholder='Enter product name'
+              label={t('nameLabel')}
+              placeholder={t('namePlaceholder')}
               required
             />
 
             <FormSelect
               control={form.control}
               name='category'
-              label='Category'
-              placeholder='Select category'
+              label={t('categoryLabel')}
+              placeholder={t('categoryPlaceholder')}
               required
               options={[
-                {
-                  label: 'Beauty Products',
-                  value: 'beauty'
-                },
-                {
-                  label: 'Electronics',
-                  value: 'electronics'
-                },
-                {
-                  label: 'Home & Garden',
-                  value: 'home'
-                },
-                {
-                  label: 'Sports & Outdoors',
-                  value: 'sports'
-                }
+                { label: t('categories.beauty'), value: 'beauty' },
+                { label: t('categories.electronics'), value: 'electronics' },
+                { label: t('categories.home'), value: 'home' },
+                { label: t('categories.sports'), value: 'sports' }
               ]}
             />
 
             <FormInput
               control={form.control}
               name='price'
-              label='Price'
-              placeholder='Enter price'
+              label={t('priceLabel')}
+              placeholder={t('pricePlaceholder')}
               required
               type='number'
               min={0}
@@ -144,8 +134,8 @@ export default function ProductForm({
           <FormTextarea
             control={form.control}
             name='description'
-            label='Description'
-            placeholder='Enter product description'
+            label={t('descriptionLabel')}
+            placeholder={t('descriptionPlaceholder')}
             required
             config={{
               maxLength: 500,
@@ -154,7 +144,7 @@ export default function ProductForm({
             }}
           />
 
-          <Button type='submit'>Add Product</Button>
+          <Button type='submit'>{t('submit')}</Button>
         </Form>
       </CardContent>
     </Card>

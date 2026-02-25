@@ -23,7 +23,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import type { AdminPermission } from './permission-tables/columns';
+import { apiClient } from '@/lib/api-client';
 
 const formSchema = z.object({
   code: z.string().min(1, 'Code is required').max(100),
@@ -43,6 +45,8 @@ export function PermissionFormDialog({
   onOpenChange,
   permission
 }: PermissionFormDialogProps) {
+  const t = useTranslations('admin.permissions.form');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const isEditing = !!permission;
@@ -72,7 +76,7 @@ export function PermissionFormDialog({
         : '/api/admin/permissions';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await apiClient(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values)
@@ -83,12 +87,12 @@ export function PermissionFormDialog({
         throw new Error(body.error ?? 'Request failed');
       }
 
-      toast.success(isEditing ? 'Permission updated' : 'Permission created');
+      toast.success(isEditing ? t('updateSuccess') : t('createSuccess'));
       onOpenChange(false);
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Something went wrong'
+        error instanceof Error ? error.message : tCommon('somethingWentWrong')
       );
     } finally {
       setSubmitting(false);
@@ -100,7 +104,7 @@ export function PermissionFormDialog({
       <DialogContent className='max-w-md'>
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Permission' : 'Add Permission'}
+            {isEditing ? t('editTitle') : t('addTitle')}
           </DialogTitle>
         </DialogHeader>
         <Form
@@ -113,10 +117,10 @@ export function PermissionFormDialog({
             name='code'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Code</FormLabel>
+                <FormLabel>{t('code')}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='e.g. admin:users:read'
+                    placeholder={t('codePlaceholder')}
                     className='font-mono'
                     {...field}
                   />
@@ -130,10 +134,10 @@ export function PermissionFormDialog({
             name='description'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{tCommon('description')}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Permission description...'
+                    placeholder={t('descriptionPlaceholder')}
                     rows={2}
                     {...field}
                   />
@@ -148,10 +152,14 @@ export function PermissionFormDialog({
               variant='outline'
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type='submit' disabled={submitting}>
-              {submitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+              {submitting
+                ? tCommon('saving')
+                : isEditing
+                  ? tCommon('update')
+                  : tCommon('create')}
             </Button>
           </DialogFooter>
         </Form>

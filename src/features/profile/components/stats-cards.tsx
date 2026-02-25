@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IconClock, IconLogin } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 interface StatsCardsProps {
   totalOnlineTime: number;
@@ -27,12 +28,14 @@ function formatDate(dateStr: string | null): string {
 }
 
 export function StatsCards({ totalOnlineTime, lastLoginAt }: StatsCardsProps) {
+  const t = useTranslations('profile.stats');
+
   return (
     <div className='grid gap-4 md:grid-cols-2'>
       <Card>
         <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
           <CardTitle className='text-sm font-medium'>
-            Total Online Time
+            {t('totalOnlineTime')}
           </CardTitle>
           <IconClock className='text-muted-foreground h-4 w-4' />
         </CardHeader>
@@ -44,7 +47,9 @@ export function StatsCards({ totalOnlineTime, lastLoginAt }: StatsCardsProps) {
       </Card>
       <Card>
         <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-          <CardTitle className='text-sm font-medium'>Last Login</CardTitle>
+          <CardTitle className='text-sm font-medium'>
+            {t('lastLogin')}
+          </CardTitle>
           <IconLogin className='text-muted-foreground h-4 w-4' />
         </CardHeader>
         <CardContent>

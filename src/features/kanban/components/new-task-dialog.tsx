@@ -12,11 +12,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslations } from 'next-intl';
 
 import { useTaskStore } from '../utils/store';
 
 export default function NewTaskDialog() {
   const addTask = useTaskStore((state) => state.addTask);
+  const t = useTranslations('kanban');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,15 +35,13 @@ export default function NewTaskDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant='secondary' size='sm'>
-          ＋ Add New Todo
+          {t('addTodo')}
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Add New Todo</DialogTitle>
-          <DialogDescription>
-            What do you want to get done today?
-          </DialogDescription>
+          <DialogTitle>{t('newTask.title')}</DialogTitle>
+          <DialogDescription>{t('newTask.description')}</DialogDescription>
         </DialogHeader>
         <form
           id='todo-form'
@@ -52,7 +52,7 @@ export default function NewTaskDialog() {
             <Input
               id='title'
               name='title'
-              placeholder='Todo title...'
+              placeholder={t('newTask.titlePlaceholder')}
               className='col-span-4'
             />
           </div>
@@ -60,7 +60,7 @@ export default function NewTaskDialog() {
             <Textarea
               id='description'
               name='description'
-              placeholder='Description...'
+              placeholder={t('newTask.descriptionPlaceholder')}
               className='col-span-4'
             />
           </div>
@@ -68,7 +68,7 @@ export default function NewTaskDialog() {
         <DialogFooter>
           <DialogTrigger asChild>
             <Button type='submit' size='sm' form='todo-form'>
-              Add Todo
+              {t('newTask.addButton')}
             </Button>
           </DialogTrigger>
         </DialogFooter>

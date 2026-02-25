@@ -93,7 +93,9 @@ export default async function UserListingPage() {
     createdAt: user.createdAt,
     lastLoginAt: user.lastLoginAt,
     totalOnlineTime: user.totalOnlineTime,
-    roles: userRolesMap.get(user.id) ?? []
+    roles: userRolesMap.get(user.id) ?? [],
+    userType: user.userType,
+    clientLoginEnabled: user.clientLoginEnabled
   }));
 
   const totalUsers = totalResult[0]?.count ?? 0;

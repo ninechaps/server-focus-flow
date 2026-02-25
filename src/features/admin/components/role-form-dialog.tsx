@@ -25,7 +25,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslations } from 'next-intl';
 import type { AdminRole } from './role-tables/columns';
+import { apiClient } from '@/lib/api-client';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50),
@@ -48,6 +50,8 @@ export function RoleFormDialog({
   role,
   allPermissions
 }: RoleFormDialogProps) {
+  const t = useTranslations('admin.roles.form');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const isEditing = !!role;
@@ -79,7 +83,7 @@ export function RoleFormDialog({
         : '/api/admin/roles';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await apiClient(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values)
@@ -90,12 +94,12 @@ export function RoleFormDialog({
         throw new Error(body.error ?? 'Request failed');
       }
 
-      toast.success(isEditing ? 'Role updated' : 'Role created');
+      toast.success(isEditing ? t('updateSuccess') : t('createSuccess'));
       onOpenChange(false);
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Something went wrong'
+        error instanceof Error ? error.message : tCommon('somethingWentWrong')
       );
     } finally {
       setSubmitting(false);
@@ -106,7 +110,9 @@ export function RoleFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-lg'>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Role' : 'Add Role'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? t('editTitle') : t('addTitle')}
+          </DialogTitle>
         </DialogHeader>
         <Form
           form={form}
@@ -118,9 +124,9 @@ export function RoleFormDialog({
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{tCommon('name')}</FormLabel>
                 <FormControl>
-                  <Input placeholder='e.g. admin' {...field} />
+                  <Input placeholder={t('namePlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -131,10 +137,10 @@ export function RoleFormDialog({
             name='description'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{tCommon('description')}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Role description...'
+                    placeholder={t('descriptionPlaceholder')}
                     rows={2}
                     {...field}
                   />
@@ -148,12 +154,12 @@ export function RoleFormDialog({
             name='permissionCodes'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Permissions</FormLabel>
+                <FormLabel>{t('permissionsLabel')}</FormLabel>
                 <ScrollArea className='h-48 rounded-md border p-3'>
                   <div className='space-y-2'>
                     {allPermissions.length === 0 && (
                       <p className='text-muted-foreground text-sm'>
-                        No permissions available
+                        {t('noPermissions')}
                       </p>
                     )}
                     {allPermissions.map((perm) => (
@@ -191,10 +197,14 @@ export function RoleFormDialog({
               variant='outline'
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type='submit' disabled={submitting}>
-              {submitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+              {submitting
+                ? tCommon('saving')
+                : isEditing
+                  ? tCommon('update')
+                  : tCommon('create')}
             </Button>
           </DialogFooter>
         </Form>

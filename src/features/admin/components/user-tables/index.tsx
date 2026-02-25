@@ -5,6 +5,7 @@ import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
 import { useDataTable } from '@/hooks/use-data-table';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { createColumns, type AdminUser } from './columns';
 
 interface UserTableProps {
@@ -18,12 +19,13 @@ export function UserTable({
   totalItems,
   canAssignRoles
 }: UserTableProps) {
+  const tCols = useTranslations('admin.users.columns');
   const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(10));
   const pageCount = Math.ceil(totalItems / pageSize);
 
   const columns = useMemo(
-    () => createColumns(canAssignRoles),
-    [canAssignRoles]
+    () => createColumns(canAssignRoles, tCols),
+    [canAssignRoles, tCols]
   );
 
   const { table } = useDataTable({

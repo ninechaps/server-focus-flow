@@ -30,6 +30,7 @@ import {
 import { navItems } from '@/config/nav-config';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useFilteredNavItems } from '@/hooks/use-nav';
+import { useTranslations } from 'next-intl';
 import {
   IconChevronRight,
   IconChevronsDown,
@@ -41,15 +42,31 @@ import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Icons } from '../icons';
+import { apiClient } from '@/lib/api-client';
+
+const NAV_KEY_MAP: Record<string, string> = {
+  Dashboard: 'dashboard',
+  Product: 'product',
+  Kanban: 'kanban',
+  Members: 'members',
+  Users: 'users',
+  Sessions: 'sessions',
+  'API Logs': 'apiLogs',
+  'Access Control': 'accessControl',
+  Roles: 'roles',
+  Permissions: 'permissions'
+};
 
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isOpen } = useMediaQuery();
   const itemsToShow = useFilteredNavItems(navItems);
+  const tNav = useTranslations('nav');
+  const tSidebar = useTranslations('sidebar');
 
   async function handleLogout() {
-    await fetch('/api/auth/session', { method: 'DELETE' });
+    await apiClient('/api/auth/session', { method: 'DELETE' });
     router.push('/auth/login');
   }
 
@@ -62,7 +79,7 @@ export default function AppSidebar() {
       <SidebarHeader />
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
+          <SidebarGroupLabel>{tSidebar('overviewGroup')}</SidebarGroupLabel>
           <SidebarMenu>
             {itemsToShow.map((item) => {
               const Icon = item.icon ? Icons[item.icon] : Icons.logo;
@@ -76,11 +93,13 @@ export default function AppSidebar() {
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        tooltip={item.title}
+                        tooltip={tNav(NAV_KEY_MAP[item.title] ?? item.title)}
                         isActive={pathname === item.url}
                       >
                         {item.icon && <Icon />}
-                        <span>{item.title}</span>
+                        <span>
+                          {tNav(NAV_KEY_MAP[item.title] ?? item.title)}
+                        </span>
                         <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -93,7 +112,11 @@ export default function AppSidebar() {
                               isActive={pathname === subItem.url}
                             >
                               <Link href={subItem.url}>
-                                <span>{subItem.title}</span>
+                                <span>
+                                  {tNav(
+                                    NAV_KEY_MAP[subItem.title] ?? subItem.title
+                                  )}
+                                </span>
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
@@ -106,12 +129,12 @@ export default function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    tooltip={item.title}
+                    tooltip={tNav(NAV_KEY_MAP[item.title] ?? item.title)}
                     isActive={pathname === item.url}
                   >
                     <Link href={item.url}>
                       <Icon />
-                      <span>{item.title}</span>
+                      <span>{tNav(NAV_KEY_MAP[item.title] ?? item.title)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -129,7 +152,7 @@ export default function AppSidebar() {
                   size='lg'
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
-                  <span className='truncate'>Account</span>
+                  <span className='truncate'>{tSidebar('account')}</span>
                   <IconChevronsDown className='ml-auto size-4' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -141,20 +164,20 @@ export default function AppSidebar() {
               >
                 <DropdownMenuLabel className='p-0 font-normal'>
                   <div className='text-muted-foreground px-1 py-1.5 text-sm'>
-                    Account Settings
+                    {tSidebar('accountSettings')}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href='/dashboard/profile'>
                     <IconUser className='mr-2 h-4 w-4' />
-                    Profile
+                    {tSidebar('profile')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <IconLogout className='mr-2 h-4 w-4' />
-                  Log out
+                  {tSidebar('logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

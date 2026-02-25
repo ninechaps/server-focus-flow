@@ -2,8 +2,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SessionCard, type SessionData } from './session-card';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api-client';
+import { useTranslations } from 'next-intl';
 
 export function SessionList() {
+  const t = useTranslations('sessions');
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [loggingOutId, setLoggingOutId] = useState<string | null>(null);
@@ -16,7 +19,7 @@ export function SessionList() {
 
   const fetchSessions = useCallback(async () => {
     try {
-      const res = await fetch('/api/sessions');
+      const res = await apiClient('/api/sessions');
 
       if (!res.ok) {
         throw new Error('Failed to fetch sessions');
@@ -25,7 +28,7 @@ export function SessionList() {
       const json = await res.json();
       setSessions(json.data.sessions);
     } catch (error) {
-      toast.error('Failed to load sessions');
+      toast.error(t('loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -38,7 +41,7 @@ export function SessionList() {
   async function handleLogout(sessionId: string) {
     setLoggingOutId(sessionId);
     try {
-      const res = await fetch(`/api/sessions/${sessionId}`, {
+      const res = await apiClient(`/api/sessions/${sessionId}`, {
         method: 'DELETE'
       });
 
@@ -46,10 +49,10 @@ export function SessionList() {
         throw new Error('Failed to logout session');
       }
 
-      toast.success('Session logged out successfully');
+      toast.success(t('logoutSuccess'));
       fetchSessions();
     } catch (error) {
-      toast.error('Failed to logout session');
+      toast.error(t('logoutFailed'));
     } finally {
       setLoggingOutId(null);
     }
@@ -68,7 +71,7 @@ export function SessionList() {
   if (sessions.length === 0) {
     return (
       <p className='text-muted-foreground py-8 text-center'>
-        No active sessions found.
+        {t('noSessions')}
       </p>
     );
   }

@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 // Define the base Next.js configuration
 const baseConfig: NextConfig = {
@@ -12,7 +13,12 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  // 确保 drizzle 迁移 SQL 文件在生产构建时被打包进 outputFileTracing 产物
+  // 否则 instrumentation.ts 在部署环境无法读取 SQL 迁移文件
+  outputFileTracingIncludes: {
+    '/*': ['./drizzle/**/*']
+  }
 };
 
 let configWithPlugins = baseConfig;
@@ -53,5 +59,6 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
   });
 }
 
-const nextConfig = configWithPlugins;
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const nextConfig = withNextIntl(configWithPlugins);
 export default nextConfig;

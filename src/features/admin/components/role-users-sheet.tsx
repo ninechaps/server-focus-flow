@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Sheet,
   SheetContent,
@@ -9,6 +10,7 @@ import {
   SheetDescription
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { apiClient } from '@/lib/api-client';
 
 interface UserEntry {
   id: string;
@@ -29,6 +31,7 @@ export function RoleUsersSheet({
   roleId,
   roleName
 }: RoleUsersSheetProps) {
+  const t = useTranslations('admin.roles.usersSheet');
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -36,10 +39,10 @@ export function RoleUsersSheet({
     if (!open || !roleId) return;
 
     setLoading(true);
-    fetch(`/api/admin/roles/${roleId}/users`)
+    apiClient(`/api/admin/roles/${roleId}/users`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((json) => setUsers(json.data.users))
-      .catch(() => toast.error('Failed to load users'))
+      .catch(() => toast.error(t('noUsers')))
       .finally(() => setLoading(false));
   }, [open, roleId]);
 
@@ -47,7 +50,7 @@ export function RoleUsersSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md'>
         <SheetHeader className='px-6 pt-6 pb-4'>
-          <SheetTitle>Users with this Role</SheetTitle>
+          <SheetTitle>{t('title')}</SheetTitle>
           <SheetDescription>{roleName}</SheetDescription>
         </SheetHeader>
         <Separator />
@@ -63,7 +66,7 @@ export function RoleUsersSheet({
             </div>
           ) : users.length === 0 ? (
             <p className='text-muted-foreground py-8 text-center text-sm'>
-              No users have this role.
+              {t('noUsers')}
             </p>
           ) : (
             <div className='space-y-2'>

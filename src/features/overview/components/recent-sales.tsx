@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardHeader,
@@ -6,65 +7,140 @@ import {
   CardTitle,
   CardDescription
 } from '@/components/ui/card';
+import { formatDistanceToNow } from 'date-fns';
+import { getTranslations } from 'next-intl/server';
 
-const salesData = [
+interface RecentUser {
+  userId: string;
+  lastActiveAt: string;
+  clientSource: string;
+  email: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  userType: string;
+}
+
+interface RecentSalesProps {
+  users: RecentUser[];
+}
+
+const MOCK_USERS: RecentUser[] = [
   {
-    name: 'Olivia Martin',
-    email: 'olivia.martin@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/1.png',
-    fallback: 'OM',
-    amount: '+$1,999.00'
+    userId: '1',
+    lastActiveAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+    clientSource: 'macos-app',
+    email: 'alice@example.com',
+    fullName: 'Alice Chen',
+    avatarUrl: null,
+    userType: 'client'
   },
   {
-    name: 'Jackson Lee',
-    email: 'jackson.lee@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/2.png',
-    fallback: 'JL',
-    amount: '+$39.00'
+    userId: '2',
+    lastActiveAt: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
+    clientSource: 'web-dashboard',
+    email: 'bob@example.com',
+    fullName: 'Bob Smith',
+    avatarUrl: null,
+    userType: 'admin'
   },
   {
-    name: 'Isabella Nguyen',
-    email: 'isabella.nguyen@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/3.png',
-    fallback: 'IN',
-    amount: '+$299.00'
+    userId: '3',
+    lastActiveAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+    clientSource: 'macos-app',
+    email: 'carol@example.com',
+    fullName: 'Carol Wu',
+    avatarUrl: null,
+    userType: 'client'
   },
   {
-    name: 'William Kim',
-    email: 'will@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/4.png',
-    fallback: 'WK',
-    amount: '+$99.00'
+    userId: '4',
+    lastActiveAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    clientSource: 'macos-app',
+    email: 'david@example.com',
+    fullName: null,
+    avatarUrl: null,
+    userType: 'client'
   },
   {
-    name: 'Sofia Davis',
-    email: 'sofia.davis@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/5.png',
-    fallback: 'SD',
-    amount: '+$39.00'
+    userId: '5',
+    lastActiveAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    clientSource: 'web-dashboard',
+    email: 'eve@example.com',
+    fullName: 'Eve Johnson',
+    avatarUrl: null,
+    userType: 'admin'
   }
 ];
 
-export function RecentSales() {
+function getInitials(name: string | null, email: string): string {
+  if (name)
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  return email.slice(0, 2).toUpperCase();
+}
+
+function SourceBadge({ source }: { source: string }) {
+  if (source === 'macos-app') {
+    return (
+      <Badge variant='outline' className='text-xs'>
+        macOS
+      </Badge>
+    );
+  }
+  if (source === 'web-dashboard') {
+    return (
+      <Badge variant='secondary' className='text-xs'>
+        Web
+      </Badge>
+    );
+  }
+  return null;
+}
+
+export async function RecentSales({ users }: RecentSalesProps) {
+  const t = await getTranslations('overview.recentSales');
+  const displayUsers = users.length === 0 ? MOCK_USERS : users;
+
   return (
     <Card className='h-full'>
       <CardHeader>
-        <CardTitle>Recent Sales</CardTitle>
-        <CardDescription>You made 265 sales this month.</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='space-y-8'>
-          {salesData.map((sale, index) => (
-            <div key={index} className='flex items-center'>
+        <div className='space-y-6'>
+          {displayUsers.map((user) => (
+            <div key={user.userId} className='flex items-center gap-3'>
               <Avatar className='h-9 w-9'>
-                <AvatarImage src={sale.avatar} alt='Avatar' />
-                <AvatarFallback>{sale.fallback}</AvatarFallback>
+                <AvatarImage
+                  src={user.avatarUrl ?? undefined}
+                  alt={user.fullName ?? user.email}
+                  className='object-cover'
+                />
+                <AvatarFallback className='text-xs'>
+                  {getInitials(user.fullName, user.email)}
+                </AvatarFallback>
               </Avatar>
-              <div className='ml-4 space-y-1'>
-                <p className='text-sm leading-none font-medium'>{sale.name}</p>
-                <p className='text-muted-foreground text-sm'>{sale.email}</p>
+              <div className='min-w-0 flex-1 space-y-0.5'>
+                <p className='truncate text-sm leading-none font-medium'>
+                  {user.fullName ?? user.email}
+                </p>
+                <p className='text-muted-foreground truncate text-xs'>
+                  {user.fullName ? user.email : ''}
+                </p>
               </div>
-              <div className='ml-auto font-medium'>{sale.amount}</div>
+              <div className='flex flex-col items-end gap-1'>
+                <SourceBadge source={user.clientSource} />
+                <span className='text-muted-foreground text-xs'>
+                  {formatDistanceToNow(new Date(user.lastActiveAt), {
+                    addSuffix: true
+                  })}
+                </span>
+              </div>
             </div>
           ))}
         </div>

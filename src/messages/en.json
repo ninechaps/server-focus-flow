@@ -1,0 +1,520 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "create": "Create",
+    "back": "Back",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "actions": "Actions",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "source": "Source",
+    "type": "Type",
+    "roles": "Roles",
+    "noData": "-",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "close": "Close",
+    "search": "Search...",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "/",
+    "total": "Total",
+    "records": "records",
+    "networkError": "Network error, please try again",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "product": "Product",
+    "kanban": "Kanban",
+    "members": "Members",
+    "users": "Users",
+    "sessions": "Sessions",
+    "apiLogs": "API Logs",
+    "accessControl": "Access Control",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "overview": "Overview"
+  },
+  "header": {
+    "search": "Search...",
+    "toggleLanguage": "Toggle language",
+    "toggleTheme": "Toggle theme"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "Enter your email and password to sign in",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "rememberMe": "Remember me",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "successToast": "Login successful"
+    },
+    "register": {
+      "title": "Register",
+      "descriptionEmail": "Enter your email to get started",
+      "descriptionCode": "Enter the verification code sent to your email",
+      "descriptionPassword": "Set your password to complete registration",
+      "descriptionSuccess": "Your account is ready",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "sendCode": "Send Verification Code",
+      "sending": "Sending...",
+      "codeSentToast": "Verification code sent to your email",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "verificationCode": "Verification Code",
+      "codeSentTo": "Code sent to {email}",
+      "verifyCode": "Verify Code",
+      "passwordLabel": "Password",
+      "passwordHint": "At least 8 characters with uppercase, lowercase, and number",
+      "confirmPasswordLabel": "Confirm Password",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+      "successToast": "Registration successful",
+      "successTitle": "Registration Successful",
+      "successMessage": "Your account has been created. You can now log in from the app.",
+      "closeCountdown": "This page will close in {countdown} seconds",
+      "closeNow": "Close Now",
+      "passwordsDoNotMatch": "Passwords do not match"
+    }
+  },
+  "overview": {
+    "pageTitle": "Overview",
+    "areaGraph": {
+      "title": "New User Registrations",
+      "description": "Monthly new users — last 6 months",
+      "trendingUp": "Trending up {pct}% this month",
+      "down": "Down {pct}% this month"
+    },
+    "barGraph": {
+      "title": "Daily Active Users",
+      "descriptionFull": "Unique logins per day — last 30 days",
+      "descriptionShort": "Last 30 days"
+    },
+    "pieGraph": {
+      "title": "Registration Sources",
+      "descriptionFull": "User distribution by sign-up method",
+      "descriptionShort": "Sign-up sources",
+      "totalUsers": "Total Users",
+      "leadsWith": "{source} leads with {pct}%",
+      "basedOn": "Based on {total} registered users"
+    },
+    "recentSales": {
+      "title": "Recently Active",
+      "description": "Last 5 users by session activity"
+    },
+    "clientChart": {
+      "title": "API Calls by Source",
+      "description": "Last 7 days — macOS App vs Web Dashboard",
+      "activeNow": "Active now: macOS {macos} / Web {web}"
+    },
+    "kpi": {
+      "welcomeBack": "Hi, Welcome back 👋",
+      "totalUsers": "Total Users",
+      "allTime": "All time",
+      "registeredUsers": "Registered users",
+      "includesAllSources": "Includes all sources",
+      "newThisMonth": "New This Month",
+      "upFromLastMonth": "Up from last month",
+      "downFromLastMonth": "Down from last month",
+      "lastMonth": "Last month: {n} new users",
+      "activeToday": "Active Today",
+      "today": "Today",
+      "uniqueUsersLoggedIn": "Unique users logged in",
+      "sinceMidnight": "Since midnight today",
+      "onlineNow": "Online Now",
+      "live": "Live",
+      "activeSessions": "Active sessions",
+      "heartbeatDesc": "Heartbeat in last 5 minutes"
+    }
+  },
+  "profile": {
+    "pageTitle": "Profile",
+    "basicInfo": {
+      "title": "Basic Info",
+      "description": "Update your display name, username, and avatar"
+    },
+    "account": {
+      "title": "Account",
+      "description": "Read-only account information",
+      "email": "Email",
+      "registered": "Registered",
+      "source": "Source",
+      "roles": "Roles"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Change your login password"
+    },
+    "usageStats": {
+      "title": "Usage Stats",
+      "viewSessions": "View Sessions"
+    },
+    "infoForm": {
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Your full name",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "letters, numbers, _ -",
+      "saveChanges": "Save Changes",
+      "updateSuccess": "Profile updated",
+      "updateFailed": "Failed to update profile"
+    },
+    "passwordForm": {
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "newPasswordHint": "At least 8 characters with uppercase, lowercase, and a number",
+      "confirmNewPassword": "Confirm New Password",
+      "updatePassword": "Update Password",
+      "updating": "Updating...",
+      "successToast": "Password changed successfully",
+      "failedToast": "Failed to change password",
+      "passwordsDoNotMatch": "New passwords do not match"
+    },
+    "avatarUpload": {
+      "edit": "Edit",
+      "selectImageFile": "Please select an image file",
+      "imageTooLarge": "Image must be smaller than 1MB",
+      "updateSuccess": "Avatar updated",
+      "updateFailed": "Failed to update avatar",
+      "uploadFailed": "Upload failed, please try again"
+    },
+    "stats": {
+      "totalOnlineTime": "Total Online Time",
+      "lastLogin": "Last Login"
+    },
+    "loadError": "Failed to load profile data",
+    "loginAgain": "Unable to load profile. Please login again."
+  },
+  "admin": {
+    "users": {
+      "columns": {
+        "email": "Email",
+        "emailPlaceholder": "Search by email...",
+        "username": "Username",
+        "source": "Source",
+        "userType": "Type",
+        "clientAccess": "Client Access",
+        "roles": "Roles",
+        "registered": "Registered",
+        "lastLogin": "Last Login",
+        "onlineTime": "Online Time"
+      },
+      "detail": {
+        "title": "User Details",
+        "email": "Email",
+        "username": "Username",
+        "source": "Source",
+        "userType": "User Type",
+        "onlineTime": "Online Time",
+        "registered": "Registered",
+        "lastLogin": "Last Login",
+        "clientAccess": "Client Access",
+        "roles": "Roles",
+        "noRoles": "No roles assigned"
+      },
+      "assignRoles": {
+        "title": "Assign Roles",
+        "noRoles": "No roles available.",
+        "save": "Save",
+        "saving": "Saving...",
+        "updateSuccess": "Roles updated",
+        "loadFailed": "Failed to load roles"
+      },
+      "cellAction": {
+        "viewDetail": "View Details",
+        "viewSessions": "View Sessions",
+        "assignRoles": "Assign Roles"
+      }
+    },
+    "roles": {
+      "columns": {
+        "name": "Name",
+        "namePlaceholder": "Search by name...",
+        "systemBadge": "System",
+        "description": "Description",
+        "permissions": "Permissions",
+        "userCount": "Users",
+        "createdAt": "Created"
+      },
+      "form": {
+        "addTitle": "Add Role",
+        "editTitle": "Edit Role",
+        "namePlaceholder": "e.g. admin",
+        "descriptionPlaceholder": "Role description...",
+        "permissionsLabel": "Permissions",
+        "noPermissions": "No permissions available",
+        "createSuccess": "Role created",
+        "updateSuccess": "Role updated"
+      },
+      "cellAction": {
+        "systemRole": "System role — cannot be modified",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete role \"{name}\"?",
+        "deleteSuccess": "Role \"{name}\" deleted",
+        "deleteFailed": "Failed to delete role"
+      },
+      "usersSheet": {
+        "title": "Role Users",
+        "noUsers": "No users with this role."
+      }
+    },
+    "permissions": {
+      "columns": {
+        "code": "Code",
+        "codePlaceholder": "Search by code...",
+        "description": "Description",
+        "roles": "Roles",
+        "createdAt": "Created"
+      },
+      "form": {
+        "addTitle": "Add Permission",
+        "editTitle": "Edit Permission",
+        "code": "Code",
+        "codePlaceholder": "e.g. admin:users:read",
+        "descriptionPlaceholder": "Permission description...",
+        "createSuccess": "Permission created",
+        "updateSuccess": "Permission updated"
+      },
+      "cellAction": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete permission \"{code}\"?",
+        "deleteSuccess": "Permission \"{code}\" deleted",
+        "deleteFailed": "Failed to delete permission"
+      },
+      "rolesSheet": {
+        "title": "Permission Roles",
+        "noRoles": "No roles with this permission."
+      }
+    },
+    "apiLogs": {
+      "pageTitle": "API Logs",
+      "allSources": "All Sources",
+      "allStatus": "All Status",
+      "filterByUser": "Filter by user ID...",
+      "columns": {
+        "time": "Time",
+        "method": "Method",
+        "path": "Path",
+        "source": "Source",
+        "user": "User",
+        "status": "Status",
+        "duration": "Duration",
+        "ip": "IP"
+      },
+      "loading": "Loading...",
+      "noLogs": "No logs found.",
+      "total": "Total: {total} records"
+    }
+  },
+  "sessions": {
+    "title": "Sessions",
+    "noSessions": "No active sessions found.",
+    "logoutSuccess": "Session logged out successfully",
+    "logoutFailed": "Failed to logout session",
+    "loadFailed": "Failed to load sessions",
+    "online": "Online",
+    "offline": "Offline",
+    "records": "{count} record",
+    "noSessionsFound": "No sessions found.",
+    "noUsersFound": "No users found.",
+    "deviceUnknown": "Unknown Device",
+    "ipUnknown": "Unknown IP",
+    "login": "Login",
+    "lastActive": "Last Active",
+    "duration": "Duration",
+    "colEmail": "Email",
+    "colStatus": "Status",
+    "colLastLogin": "Last Login",
+    "colLastIp": "Last IP",
+    "colSessions": "Sessions"
+  },
+  "kanban": {
+    "pageTitle": "Kanban",
+    "pageDescription": "Manage tasks by dnd",
+    "addTodo": "＋ Add New Todo",
+    "newTask": {
+      "title": "Add New Todo",
+      "description": "What do you want to get done today?",
+      "titlePlaceholder": "Todo title...",
+      "descriptionPlaceholder": "Description...",
+      "addButton": "Add Todo"
+    },
+    "addSection": "＋ Add New Section",
+    "newSection": {
+      "title": "Add New Section",
+      "description": "What section you want to add today?",
+      "titlePlaceholder": "Section title...",
+      "addButton": "Add Section"
+    },
+    "task": "Task",
+    "columnActions": {
+      "rename": "Rename",
+      "deleteSection": "Delete Section",
+      "confirmDeleteTitle": "Are you sure want to delete column?",
+      "confirmDeleteDescription": "NOTE: All tasks related to this category will also be deleted.",
+      "deleted": "This column has been deleted."
+    }
+  },
+  "products": {
+    "pageTitle": "Products",
+    "form": {
+      "imageLabel": "Product Image",
+      "imageDescription": "Upload a product image",
+      "nameLabel": "Product Name",
+      "namePlaceholder": "Enter product name",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "Select category",
+      "priceLabel": "Price",
+      "pricePlaceholder": "Enter price",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Enter product description",
+      "submit": "Add Product",
+      "categories": {
+        "beauty": "Beauty Products",
+        "electronics": "Electronics",
+        "home": "Home & Garden",
+        "sports": "Sports & Outdoors"
+      }
+    },
+    "columns": {
+      "image": "IMAGE",
+      "name": "Name",
+      "namePlaceholder": "Search products...",
+      "category": "Category",
+      "price": "PRICE",
+      "description": "DESCRIPTION"
+    },
+    "cellAction": {
+      "update": "Update",
+      "delete": "Delete"
+    }
+  },
+  "alertModal": {
+    "title": "Are you sure?",
+    "description": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "sidebar": {
+    "overviewGroup": "Overview",
+    "account": "Account",
+    "accountSettings": "Account Settings",
+    "profile": "Profile",
+    "logout": "Log out"
+  },
+  "userNav": {
+    "account": "Account",
+    "profile": "Profile",
+    "logout": "Log out",
+    "logoutFailed": "Logout failed",
+    "upgradeToPro": "Upgrade to Pro",
+    "billing": "Billing",
+    "notifications": "Notifications"
+  },
+  "notFound": {
+    "heading": "Something's missing",
+    "description": "Sorry, the page you are looking for doesn't exist or has been moved.",
+    "goBack": "Go back",
+    "backHome": "Back to Home"
+  },
+  "about": {
+    "pageTitle": "About",
+    "heading": "About",
+    "subheading": "Learn more about this project",
+    "openSource": {
+      "title": "Open-Source Project",
+      "description": "This is an open-source Next.js admin dashboard starter built with modern web technologies. It provides a solid foundation for building powerful admin interfaces and dashboards. The source code is freely available for developers to use, modify, and distribute."
+    },
+    "demo": {
+      "title": "Demo Purpose",
+      "description": "This application serves as a demo for demonstration purposes. It showcases the features, components, and capabilities of the admin dashboard starter. Feel free to explore the interface, test the functionality, and evaluate if it meets your project requirements."
+    },
+    "auth": {
+      "title": "Custom Authentication",
+      "description": "Authentication for this application is handled by a custom JWT-based RBAC system with role and permission management built in."
+    },
+    "privacy": {
+      "title": "Data Privacy",
+      "description": "We take your privacy seriously. No personal data is misused, shared, or sold to third parties. Any information collected during your use of this demo application is used solely for the purpose of providing the demonstration experience and is handled in accordance with best practices for data protection."
+    },
+    "footer": "Built with Next.js, Tailwind CSS, and shadcn/ui"
+  },
+  "privacyPolicy": {
+    "pageTitle": "Privacy Policy",
+    "heading": "Privacy Policy",
+    "lastUpdated": "Last updated: February 2026",
+    "intro": {
+      "title": "Introduction",
+      "description": "This Privacy Policy explains how we handle your personal information when you use our application. We are committed to protecting your privacy and ensuring transparency about our data practices. Please read this policy carefully to understand how we collect, use, and safeguard your information."
+    },
+    "dataCollection": {
+      "title": "Data Collection",
+      "description": "Our application collects minimal data necessary for authentication purposes. When you sign in, we receive basic profile information such as your email address and name. This data is used solely to identify you within the application and provide personalized access to features."
+    },
+    "authSection": {
+      "title": "Authentication",
+      "description": "Our application uses a custom JWT-based authentication system. All authentication processes, including sign-in and password management, are handled securely within our system."
+    },
+    "noMisuse": {
+      "title": "No Data Misuse",
+      "description": "We take your privacy seriously. We want to assure you that your personal data is never sold, rented, or shared with third parties for marketing or commercial purposes. Your information is used exclusively for the intended functionality of this application."
+    },
+    "demoApp": {
+      "title": "Demo Application",
+      "description": "Please note that this is a demo application created for demonstration and educational purposes. It showcases various features and technologies but should not be considered a production-ready service. Any data you provide may be temporary and could be removed at any time as part of regular maintenance."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please feel free to contact us."
+    }
+  },
+  "termsOfService": {
+    "pageTitle": "Terms of Service",
+    "heading": "Terms of Service",
+    "lastUpdated": "Last updated:",
+    "intro": {
+      "title": "Introduction",
+      "description": "Welcome to our application. These Terms of Service govern your access to and use of our platform. By accessing or using this application, you agree to be bound by these terms. Please read them carefully before proceeding to use our services."
+    },
+    "demo": {
+      "title": "Demo Purpose",
+      "description": "This application is provided solely for demonstration and educational purposes. It is not intended for production use, and we make no guarantees regarding its suitability for any specific purpose. All data and functionality are provided as-is for showcasing features and capabilities only."
+    },
+    "openSource": {
+      "title": "Open Source",
+      "description": "This is an open-source project. The source code is available for review, modification, and distribution under the applicable open-source license. We encourage community contributions and feedback to help improve the project. Please refer to the project repository for licensing details and contribution guidelines."
+    },
+    "noWarranty": {
+      "title": "No Warranty",
+      "description": "This application is provided \"as is\" without any warranties of any kind, either express or implied. We expressly disclaim all warranties, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement."
+    },
+    "dataUsage": {
+      "title": "Data Usage",
+      "description": "Any data you provide while using this demo application may be stored temporarily for the purpose of demonstrating functionality. Please do not enter sensitive, personal, or confidential information. Data may be deleted or reset at any time without notice."
+    },
+    "changes": {
+      "title": "Changes to These Terms",
+      "description": "We reserve the right to modify or replace these Terms of Service at any time at our sole discretion. Your continued use of the application following the posting of any changes constitutes acceptance of those changes."
+    },
+    "contactNote": "If you have any questions about these Terms of Service, please refer to the project documentation or repository for more information."
+  }
+}
